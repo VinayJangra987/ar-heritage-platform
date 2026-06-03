@@ -47,3 +47,20 @@ mongoose
     );
   })
   .catch((err) => console.error("❌ DB Error:", err));
+
+
+
+
+  console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB Connected");
+    app.listen(process.env.PORT || 5000, () => {
+      console.log("Server Started");
+    });
+  })
+  .catch((err) => {
+    console.error("DB ERROR:", err);
+  });
