@@ -1,0 +1,149 @@
+/* ── UserMenu.css ── */
+.um-login-btn {
+  background: linear-gradient(135deg, #c9a227, #f0d060);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  color: #0d1b3e;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.um-login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(212,175,55,0.35);
+}
+
+.um-wrap {
+  position: relative;
+}
+
+.um-avatar-btn {
+  background: rgba(212,175,55,0.1);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 50px;
+  padding: 0.35rem 0.9rem 0.35rem 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.um-avatar-btn:hover { background: rgba(212,175,55,0.18); }
+
+.um-avatar {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #c9a227, #f0d060);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d1b3e;
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.um-name {
+  color: #d4af37;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.um-chevron {
+  color: rgba(212,175,55,0.5);
+  font-size: 0.6rem;
+}
+
+/* Dropdown */
+.um-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: linear-gradient(160deg, #0d1b3e, #0a1428);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 14px;
+  padding: 0.8rem;
+  min-width: 240px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: umDrop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1000;
+}
+
+@keyframes umDrop {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.um-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.4rem 0.4rem 0.8rem;
+}
+
+.um-big-avatar {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #c9a227, #f0d060);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d1b3e;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.um-full-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.um-email {
+  color: rgba(255,255,255,0.35);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+.um-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 0.3rem 0;
+}
+
+.um-item {
+  width: 100%;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  padding: 0.65rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+.um-item:hover {
+  background: rgba(212,175,55,0.1);
+  color: #d4af37;
+}
+
+.um-badge {
+  margin-left: auto;
+  background: linear-gradient(135deg, #c9a227, #f0d060);
+  color: #0d1b3e;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 99px;
+}

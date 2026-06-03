@@ -1,0 +1,275 @@
+/* ── Navbar base ── */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+  padding: 0 1.5rem;
+}
+
+.navbar.scrolled {
+  background: rgba(8, 15, 35, 0.92);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 2px 30px rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.navbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* ── Brand ── */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-shrink: 0;
+}
+
+.navbar-logo {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+}
+
+.navbar-title {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #d4af37;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.navbar-subtitle {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Nav Links ── */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.ar-badge {
+  background: rgba(212, 175, 55, 0.1) !important;
+  border: 1px solid rgba(212, 175, 55, 0.25) !important;
+  color: #d4af37 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.ar-badge:hover {
+  background: rgba(212, 175, 55, 0.2) !important;
+}
+
+/* ── Right Side ── */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.navbar-search-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-search-btn:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.3);
+  color: #d4af37;
+}
+
+/* ── Auth slot — renders UserMenu ── */
+.navbar-auth-slot {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Hamburger (mobile only) ── */
+.navbar-hamburger {
+  display: none;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.navbar-hamburger:hover {
+  border-color: #d4af37;
+  color: #d4af37;
+}
+
+/* ── Mobile Menu ── */
+.navbar-mobile-menu {
+  background: rgba(8, 15, 35, 0.97);
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  padding: 0.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  animation: mobileMenuDrop 0.2s ease;
+}
+
+@keyframes mobileMenuDrop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-nav-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 0.75rem 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.mobile-nav-link:hover {
+  background: rgba(212, 175, 55, 0.08);
+  color: #d4af37;
+}
+
+.mobile-auth-slot {
+  padding: 0.5rem 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 0.3rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none;
+  }
+
+  .navbar-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-title {
+    font-size: 0.95rem;
+  }
+
+  .navbar-subtitle {
+    display: none;
+  }
+}
+
+
+/* ═══════════════════════════════════════
+   NAVBAR FAVOURITES STYLES
+   Paste at END of your Navbar.css
+═══════════════════════════════════════ */
+
+/* Favourites nav link */
+.nav-fav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.nav-fav-icon {
+  font-size: 0.75rem;
+  color: #C9A84C;
+  transition: transform 0.2s;
+}
+
+.nav-fav-link:hover .nav-fav-icon {
+  transform: scale(1.2);
+}
+
+.nav-fav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #C9A84C;
+  color: #0D1B2A;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.45rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  padding: 0 4px;
+  margin-left: 2px;
+  animation: badgePop 0.3s ease;
+}
+
+@keyframes badgePop {
+  0%   { transform: scale(0); }
+  70%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Mobile fav button */
+.navbar-fav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(242,232,208,0.6);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.4rem;
+  transition: color 0.2s;
+  display: none; /* shown on mobile only via media query */
+}
+
+.navbar-fav-btn:hover { color: #C9A84C; }
+
+@media (max-width: 768px) {
+  .navbar-fav-btn { display: flex; align-items: center; justify-content: center; }
+}
