@@ -1,5 +1,5 @@
 // src/api.js — sab API calls yahan se hongi
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = `${process.env.REACT_APP_API_URL}/api`;
 
 // Token localStorage se lena
 const getToken = () => localStorage.getItem("token");
