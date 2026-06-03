@@ -17,9 +17,7 @@ import DiscoveryTour   from "./components/DiscoveryTour";
 import heritageData    from "./data/heritage";
 import "./App.css";
 
-// ── Backend base URL — sirf yahan change karo ────────────────────────────────
-const API_BASE = "http://localhost:5000/api";
-
+const API_BASE = "https://ar-heritage-platform.onrender.com/api";
 // ════════════════════════════════════════════════════════════════════════════
 // FOOTER
 // ════════════════════════════════════════════════════════════════════════════
