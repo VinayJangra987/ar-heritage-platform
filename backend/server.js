@@ -12,19 +12,18 @@ const tourRoutes = require("./routes/tourRoutes");
 
 const app = express();
 
-process.on("uncaughtException", (err) => {
-  console.log("UNCAUGHT ERROR:", err.message);
-  console.log(err.stack);
-});
-
 // Debug logs
 console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
 console.log("CLIENT_URL:", process.env.CLIENT_URL);
 
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT ERROR:", err);
+});
+
 // Middleware
 app.use(
   cors({
-    origin: true, // Vercel preview + production domains allow
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
   })
 );
@@ -39,17 +38,20 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/nearby", nearbyRoutes);
 app.use("/api/tours", tourRoutes);
 
-// Health check
+// Health Check
 app.get("/", (req, res) => {
-  res.json({ status: "Bharatiya Dharohar API running 🏛️" });
+  res.json({
+    status: "Bharatiya Dharohar API running 🏛️",
+  });
 });
 
-// Global error handler
+// Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res
-    .status(err.status || 500)
-    .json({ message: err.message || "Internal Server Error" });
+
+  res.status(err.status || 500).json({
+    message: err.message || "Internal Server Error",
+  });
 });
 
 // MongoDB + Server Start
@@ -58,10 +60,10 @@ mongoose
   .then(() => {
     console.log("✅ MongoDB Connected");
 
-    app.listen(process.env.PORT || 5000, () => {
-      console.log(
-        `🚀 Server running on port ${process.env.PORT || 5000}`
-      );
+    const PORT = process.env.PORT || 5000;
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
