@@ -22,11 +22,15 @@ process.on("uncaughtException", (err) => {
 
 // Middleware
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://ar-heritage-platform.vercel.app',
-    'https://ar-heritage-platform-git-main-vinayjangra987s-projects.vercel.app'
-  ],
+  origin: function(origin, callback) {
+    if (!origin || 
+        origin.includes('vercel.app') || 
+        origin.includes('localhost')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
