@@ -87,7 +87,6 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import nearbyRoutes from "./routes/nearbyRoutes.js";
 import tourRoutes from "./routes/tourRoutes.js";
-import dns from "dns";
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const app = express();
