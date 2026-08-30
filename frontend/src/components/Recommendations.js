@@ -1,18 +1,19 @@
-// src/components/Recommendations.js
 import { useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
-import heritageData from "../data/heritage";
 
-export default function Recommendations({ lastViewedId, onSiteClick, onShowAuth }) {
+export default function Recommendations({ lastViewedId, onSiteClick, onShowAuth, allSites = [] }) {
   const { user, toggleFavorite } = useAuth();
 
   const recommendations = useMemo(() => {
-    const allSites = heritageData.getAllSites();
     if (!lastViewedId) {
       return allSites.filter((s) => s.unesco).slice(0, 6);
     }
-    return heritageData.getRecommendations(lastViewedId);
-  }, [lastViewedId]);
+    const viewed = allSites.find(s => (s._id || s.id) === lastViewedId);
+    if (!viewed) return allSites.slice(0, 6);
+    return allSites
+      .filter(s => (s._id || s.id) !== lastViewedId && s.state === viewed.state)
+      .slice(0, 6);
+  }, [lastViewedId, allSites]);
 
   const isFav = (id) => user?.favorites?.includes(id);
 
@@ -119,8 +120,6 @@ export default function Recommendations({ lastViewedId, onSiteClick, onShowAuth 
           align-items: center;
           gap: 4px;
         }
-
-        /* ── FAV BUTTON ── */
         .rec-fav-btn {
           position: absolute;
           bottom: 10px; right: 10px;
@@ -154,7 +153,6 @@ export default function Recommendations({ lastViewedId, onSiteClick, onShowAuth 
           100% { transform: scale(1); }
         }
         .rec-fav-btn.pop { animation: favPop 0.3s ease; }
-
         .rec-card-body { padding: 1rem 1.1rem 1.1rem; }
         .rec-card-name {
           font-family: 'Cormorant Garamond', serif;
@@ -227,7 +225,7 @@ export default function Recommendations({ lastViewedId, onSiteClick, onShowAuth 
             <div className="rec-empty">Explore a site to get personalized recommendations</div>
           ) : (
             recommendations.map((site) => (
-              <div key={site.id} className="rec-card" onClick={() => onSiteClick(site)}>
+              <div key={site._id || site.id} className="rec-card" onClick={() => onSiteClick(site)}>
                 <div className="rec-card-img-wrap">
                   <img
                     className="rec-card-img"
@@ -237,12 +235,10 @@ export default function Recommendations({ lastViewedId, onSiteClick, onShowAuth 
                   />
                   <div className="rec-card-overlay" />
 
-                  {/* AI Pick badge */}
                   {site.relevanceScore > 0 && (
                     <div className="rec-relevance">✦ AI Pick</div>
                   )}
 
-                  {/* UNESCO badge */}
                   {site.unesco && (
                     <div style={{
                       position: "absolute", top: "10px", left: "10px",
@@ -253,15 +249,18 @@ export default function Recommendations({ lastViewedId, onSiteClick, onShowAuth 
                     }}>UNESCO</div>
                   )}
 
-                  {/* ♥ Favourite button */}
                   <button
-                    className={`rec-fav-btn ${isFav(site.id) ? "active" : ""}`}
-                    onClick={(e) => handleFav(e, site.id)}
-                    title={isFav(site.id) ? "Remove from favourites" : "Add to favourites"}
+                    className={`rec-fav-btn ${isFav(site._id || site.id) ? "active" : ""}`}
+                    onClick={(e) => handleFav(e, site._id || site.id)}
+                    title={isFav(site._id || site.id) ? "Remove from favourites" : "Add to favourites"}
                     onAnimationEnd={e => e.currentTarget.classList.remove("pop")}
-                    onMouseDown={e => { e.currentTarget.classList.remove("pop"); void e.currentTarget.offsetWidth; e.currentTarget.classList.add("pop"); }}
+                    onMouseDown={e => {
+                      e.currentTarget.classList.remove("pop");
+                      void e.currentTarget.offsetWidth;
+                      e.currentTarget.classList.add("pop");
+                    }}
                   >
-                    {isFav(site.id) ? "♥" : "♡"}
+                    {isFav(site._id || site.id) ? "♥" : "♡"}
                   </button>
                 </div>
 

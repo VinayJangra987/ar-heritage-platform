@@ -1,7 +1,3 @@
-
-
-
-// src/components/Modal.js
 import { useEffect, useState } from "react";
 import { reviewsAPI } from "../api";
 import { useAuth } from "../context/AuthContext";

@@ -1,6 +1,3 @@
-// src/components/ARLauncher.js
-// Cinematic AR intro animation → then launches ARView
-// Use this instead of directly opening ARView from "View in AR" button
 
 import { useState, useEffect } from "react";
 

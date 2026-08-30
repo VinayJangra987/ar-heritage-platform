@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 import AdminPanel from "./AdminPanel";
 
-const Navbar = ({ onSearchOpen, onMapClick, onARClick, onFavClick, extraRight }) => {
+const Navbar = ({ onSearchOpen, onMapClick, onARClick, onFavClick, extraRight, onAuthChoiceClick }) => {
   const { user } = useAuth();
   const [scrolled,   setScrolled]   = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
@@ -16,6 +16,7 @@ const Navbar = ({ onSearchOpen, onMapClick, onARClick, onFavClick, extraRight })
   }, []);
 
   const favCount = user?.favorites?.length || 0;
+  const isAdmin = user?.role === 'admin';
 
   return (
     <>
@@ -54,7 +55,7 @@ const Navbar = ({ onSearchOpen, onMapClick, onARClick, onFavClick, extraRight })
           </div>
 
           {/* Right side */}
-          <div className="navbar-right">
+          <div className="navbar-right" style={{ gap: '0.4rem' }}>
             <button className="navbar-search-btn" onClick={onSearchOpen} aria-label="Search">🔍</button>
 
             {/* Mobile fav icon */}
@@ -80,30 +81,40 @@ const Navbar = ({ onSearchOpen, onMapClick, onARClick, onFavClick, extraRight })
               )}
             </button>
 
-            {extraRight && <div className="navbar-auth-slot">{extraRight}</div>}
+            {/* ✅ Logged-in: UserMenu dikhega. Logged-out: sirf "Sign In" button — duplicate nahi */}
+            {user ? (
+              extraRight && <div className="navbar-auth-slot">{extraRight}</div>
+            ) : (
+              onAuthChoiceClick && (
+                <button
+                  onClick={onAuthChoiceClick}
+                  style={{
+                    padding: '6px 10px',
+                    background: 'rgba(212,175,55,0.1)',
+                    border: '1px solid rgba(212,175,55,0.3)',
+                    borderRadius: '8px',
+                    color: '#d4af37',
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    fontFamily: "'Space Mono', monospace",
+                  }}
+                >
+                  🔑 Sign In
+                </button>
+              )
+            )}
 
-            {/* Admin button */}
-            <button
-              onClick={() => setShowAdmin(true)}
-              style={{
-                padding: '6px 14px',
-                background: 'rgba(201,168,76,0.12)',
-                border: '1px solid rgba(201,168,76,0.3)',
-                borderRadius: '8px',
-                color: '#C9A84C',
-                fontFamily: "'Space Mono', monospace",
-                fontSize: '0.55rem',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              onMouseOver={e => e.currentTarget.style.background = 'rgba(201,168,76,0.22)'}
-              onMouseOut={e => e.currentTarget.style.background = 'rgba(201,168,76,0.12)'}
-            >
-              🔐 Admin
-            </button>
+            {/* ✅ Admin button — sirf tab dikhega jab logged-in user ka role 'admin' ho */}
+            {/* {isAdmin && (
+              <button
+                className="navbar-admin-btn"
+                onClick={() => setShowAdmin(true)}
+              >
+                🔐 Admin
+              </button>
+            )} */}
 
             <button
               className="navbar-hamburger"
@@ -139,19 +150,33 @@ const Navbar = ({ onSearchOpen, onMapClick, onARClick, onFavClick, extraRight })
               🔍 Search
             </button>
 
-            {/* Admin in mobile menu too */}
-            <button className="mobile-nav-link" onClick={() => { setShowAdmin(true); setMenuOpen(false); }}>
-              🔐 Admin Panel
-            </button>
+            {/* ✅ Logged-out: Sign In Options. Logged-in: UserMenu */}
+            {user ? (
+              extraRight && <div className="mobile-auth-slot">{extraRight}</div>
+            ) : (
+              onAuthChoiceClick && (
+                <button className="mobile-nav-link" onClick={() => { onAuthChoiceClick(); setMenuOpen(false); }}>
+                  🔑 Sign In Options
+                </button>
+              )
+            )}
 
-            {extraRight && <div className="mobile-auth-slot">{extraRight}</div>}
+            {/* ✅ Admin in mobile menu — sirf admin ko */}
+            {isAdmin && (
+              <button className="mobile-nav-link" onClick={() => { setShowAdmin(true); setMenuOpen(false); }}>
+                🔐 Admin Panel
+              </button>
+            )}
           </div>
         )}
       </nav>
 
-      {/* ✅ AdminPanel — correctly outside nav, at root level */}
-      {showAdmin && (
-        <AdminPanel onClose={() => setShowAdmin(false)} />
+      {/* AdminPanel — root level pe, navbar ke bahar */}
+     {isAdmin && showAdmin && (
+        <AdminPanel
+          onClose={() => setShowAdmin(false)}
+          adminUser={user}
+        />
       )}
     </>
   );

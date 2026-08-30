@@ -1,7 +1,4 @@
-// src/components/NearbySites.js
-// Shows heritage monuments near the user's current location
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const ALL_MONUMENTS = [
   { id: "taj", name: "Taj Mahal", location: "Agra, UP", state: "Uttar Pradesh", type: "architectural", lat: 27.1751, lng: 78.0421, image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&q=80", era: "17th Century CE" },
@@ -38,7 +35,7 @@ export default function NearbySites({ onClose, onViewSite }) {
   const [radius,   setRadius]   = useState(500); // km
   const [sortBy,   setSortBy]   = useState("distance");
 
-  const fetchLocation = () => {
+  const fetchLocation = useCallback(() => {
     setStatus("loading");
     if (!navigator.geolocation) { setStatus("error"); return; }
     navigator.geolocation.getCurrentPosition(
@@ -55,9 +52,9 @@ export default function NearbySites({ onClose, onViewSite }) {
       () => setStatus("denied"),
       { timeout: 10000 }
     );
-  };
+  }, [radius]);
 
-  useEffect(() => { fetchLocation(); }, [radius]);
+  useEffect(() => { fetchLocation(); }, [fetchLocation]);
 
   const sorted = [...results].sort((a, b) =>
     sortBy === "distance" ? a.distance - b.distance : a.name.localeCompare(b.name)
@@ -78,7 +75,6 @@ export default function NearbySites({ onClose, onViewSite }) {
           animation:nbFadeIn 0.3s ease;
         }
 
-        /* Top bar */
         .nb-topbar {
           display:flex;align-items:center;justify-content:space-between;
           padding:1rem 1.5rem;
@@ -91,7 +87,6 @@ export default function NearbySites({ onClose, onViewSite }) {
         .nb-close { width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(242,232,208,0.06);border:1px solid rgba(242,232,208,0.12);border-radius:10px;color:rgba(242,232,208,0.6);font-size:1rem;cursor:pointer;transition:all 0.2s; }
         .nb-close:hover { background:rgba(201,168,76,0.15);color:#C9A84C; }
 
-        /* Controls */
         .nb-controls {
           display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;
           border-bottom:1px solid rgba(242,232,208,0.06);flex-shrink:0;flex-wrap:wrap;
@@ -104,10 +99,8 @@ export default function NearbySites({ onClose, onViewSite }) {
         .nb-refresh-btn { padding:6px 14px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:8px;color:#C9A84C;font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s; }
         .nb-refresh-btn:hover { background:rgba(201,168,76,0.2); }
 
-        /* Body */
         .nb-body { flex:1;overflow-y:auto;padding:1.5rem; }
 
-        /* State screens */
         .nb-state-screen {
           display:flex;flex-direction:column;align-items:center;justify-content:center;
           height:100%;gap:1.2rem;text-align:center;padding:3rem;
@@ -119,7 +112,6 @@ export default function NearbySites({ onClose, onViewSite }) {
         .nb-action-btn { padding:0.8rem 2rem;background:linear-gradient(135deg,#C9A84C,#E8C96A);color:#0D1B2A;border:none;border-radius:50px;font-family:'Space Mono',monospace;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.25s; }
         .nb-action-btn:hover { transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.35); }
 
-        /* User location bar */
         .nb-location-bar {
           display:flex;align-items:center;gap:0.75rem;
           padding:0.75rem 1rem;background:rgba(74,200,120,0.06);
@@ -128,14 +120,12 @@ export default function NearbySites({ onClose, onViewSite }) {
         .nb-loc-dot { width:8px;height:8px;border-radius:50%;background:#4AC878;flex-shrink:0;animation:nbPulse 2s infinite; }
         .nb-loc-text { font-family:'Space Mono',monospace;font-size:0.52rem;color:rgba(74,200,120,0.8);letter-spacing:0.1em; }
 
-        /* Result header */
         .nb-result-header {
           display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;
         }
         .nb-result-title { font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:#F2E8D0; }
         .nb-result-count { font-family:'Space Mono',monospace;font-size:0.52rem;color:rgba(201,168,76,0.6);letter-spacing:0.1em; }
 
-        /* Cards */
         .nb-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem; }
         .nb-card {
           background:rgba(8,18,30,0.9);border:1px solid rgba(242,232,208,0.07);
@@ -168,7 +158,6 @@ export default function NearbySites({ onClose, onViewSite }) {
         }
         .nb-map-btn:hover { background:rgba(201,168,76,0.2); }
 
-        /* Empty */
         .nb-empty { text-align:center;padding:3rem;color:rgba(242,232,208,0.3);font-size:0.9rem; }
         .nb-empty-icon { font-size:2.5rem;margin-bottom:0.75rem; }
 
@@ -176,7 +165,6 @@ export default function NearbySites({ onClose, onViewSite }) {
       `}</style>
 
       <div className="nb-overlay">
-        {/* Top bar */}
         <div className="nb-topbar">
           <div className="nb-topbar-left">
             <span className="nb-badge">📍 Nearby</span>
@@ -185,7 +173,6 @@ export default function NearbySites({ onClose, onViewSite }) {
           <button className="nb-close" onClick={onClose}>✕</button>
         </div>
 
-        {/* Controls */}
         <div className="nb-controls">
           <span className="nb-radius-label">Radius: <span className="nb-radius-val">{radius} km</span></span>
           <input type="range" className="nb-slider" min={100} max={2000} step={100} value={radius} onChange={e => setRadius(Number(e.target.value))} />
@@ -196,7 +183,6 @@ export default function NearbySites({ onClose, onViewSite }) {
           <button className="nb-refresh-btn" onClick={fetchLocation}>↻ Refresh</button>
         </div>
 
-        {/* Body */}
         <div className="nb-body">
           {status === "idle" && (
             <div className="nb-state-screen">

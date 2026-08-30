@@ -147,3 +147,20 @@
   padding: 2px 8px;
   border-radius: 99px;
 }
+
+.um-admin-item {
+  color: #C9A84C;
+}
+
+.um-role-badge {
+  font-size: 0.6rem;
+  background: rgba(201, 168, 76, 0.15);
+  color: #C9A84C;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 3px;
+  display: inline-block;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

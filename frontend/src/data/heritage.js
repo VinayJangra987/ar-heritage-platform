@@ -1,7 +1,3 @@
-// src/data/heritage.js
-// AR-Based Cultural Heritage Preservation & Tourism Platform
-// Data file: Indian Heritage Sites organized hierarchically
-
 export const heritageData = {
   states: {
     rajasthan: {

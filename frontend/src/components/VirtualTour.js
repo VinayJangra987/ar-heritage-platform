@@ -1,6 +1,3 @@
-// src/components/VirtualTour.js
-// Immersive guided virtual tour with progress tracking
-
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const TOURS = [

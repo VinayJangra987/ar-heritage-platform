@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './UserMenu.css';
 
-const UserMenu = ({ onShowAuth, onShowFavorites }) => {
+const UserMenu = ({ onShowAuth, onShowFavorites, onShowAdmin }) => {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef();
@@ -23,6 +23,7 @@ const UserMenu = ({ onShowAuth, onShowFavorites }) => {
 
   const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   const favCount = user.favorites?.length || 0;
+  const isAdmin = user.role === 'admin'; // ✅ Role check
 
   return (
     <div className="um-wrap" ref={ref}>
@@ -39,10 +40,19 @@ const UserMenu = ({ onShowAuth, onShowFavorites }) => {
             <div>
               <div className="um-full-name">{user.name}</div>
               <div className="um-email">{user.email}</div>
+              {isAdmin && <div className="um-role-badge">Admin</div>}
             </div>
           </div>
 
           <div className="um-divider" />
+
+          {/* ✅ Admin button - sirf admin ko dikhega */}
+          {isAdmin && (
+            <button className="um-item um-admin-item" onClick={() => { onShowAdmin?.(); setOpen(false); }}>
+              <span>⚙️</span>
+              <span>Admin Panel</span>
+            </button>
+          )}
 
           <button className="um-item" onClick={() => { onShowFavorites?.(); setOpen(false); }}>
             <span>❤️</span>

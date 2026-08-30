@@ -1,6 +1,15 @@
-// src/components/MapView.js
 import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import heritageData from "../data/heritage";
+
+// Fix default marker icon issue with webpack
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+});
 
 const typeColors = {
   architectural: "#C9A84C",
@@ -28,8 +37,7 @@ export default function MapView({ onSiteClick }) {
   const [selectedSite, setSelectedSite] = useState(null);
   const [filterType,   setFilterType]   = useState("");
   const [filterState,  setFilterState]  = useState("");
-  const [mapLoaded,    setMapLoaded]    = useState(false);
-  const [mapActive,    setMapActive]    = useState(false); // scroll-zoom guard
+  const [mapActive,    setMapActive]    = useState(false);
 
   const allSites      = heritageData.getAllSites();
   const filteredSites = allSites.filter((s) => {
@@ -38,31 +46,14 @@ export default function MapView({ onSiteClick }) {
     return true;
   });
 
-  /* ── Load Leaflet ── */
-  useEffect(() => {
-    if (!document.getElementById("leaflet-css")) {
-      const link = document.createElement("link");
-      link.id   = "leaflet-css";
-      link.rel  = "stylesheet";
-      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(link);
-    }
-    if (window.L) { setMapLoaded(true); return; }
-    const script    = document.createElement("script");
-    script.src      = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload   = () => setMapLoaded(true);
-    document.head.appendChild(script);
-  }, []);
-
   /* ── Init map ── */
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || mapInstanceRef.current) return;
-    const L   = window.L;
+    if (!mapRef.current || mapInstanceRef.current) return;
+
     const map = L.map(mapRef.current, {
       center:          [22.5, 80.0],
       zoom:            5,
       zoomControl:     false,
-      // KEY FIX: disable scroll zoom by default
       scrollWheelZoom: false,
     });
 
@@ -74,7 +65,7 @@ export default function MapView({ onSiteClick }) {
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
     mapInstanceRef.current = map;
-  }, [mapLoaded]);
+  }, []);
 
   /* ── Enable/disable scroll zoom based on mapActive ── */
   useEffect(() => {
@@ -100,8 +91,7 @@ export default function MapView({ onSiteClick }) {
 
   /* ── Markers ── */
   useEffect(() => {
-    if (!mapLoaded || !mapInstanceRef.current) return;
-    const L   = window.L;
+    if (!mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
 
     markersRef.current.forEach((m) => map.removeLayer(m));
@@ -197,7 +187,7 @@ export default function MapView({ onSiteClick }) {
       `;
       document.head.appendChild(style);
     }
-  }, [mapLoaded, filteredSites]);
+  }, [filteredSites]);
 
   /* ── Global popup handler ── */
   useEffect(() => {
@@ -208,7 +198,7 @@ export default function MapView({ onSiteClick }) {
     return () => { delete window.__heritageOpenSite; };
   }, [onSiteClick, allSites]);
 
-  const states       = Object.entries(heritageData.states);
+  const states        = Object.entries(heritageData.states);
   const heritageTypes = Object.entries(heritageData.heritageTypes);
 
   return (
@@ -257,8 +247,6 @@ export default function MapView({ onSiteClick }) {
           margin-left: auto;
         }
         .map-site-count span { color: #C9A84C; font-weight: 700; }
-
-        /* Map container */
         .map-container {
           width: 100%;
           height: 580px;
@@ -275,8 +263,6 @@ export default function MapView({ onSiteClick }) {
           height: 100% !important;
           background: #0A141F !important;
         }
-
-        /* ── SCROLL ZOOM SHIELD ── */
         .map-scroll-shield {
           position: absolute;
           inset: 0;
@@ -305,34 +291,6 @@ export default function MapView({ onSiteClick }) {
           0%,100% { opacity: 0.7; }
           50%      { opacity: 1; }
         }
-
-        .map-loading {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #0A141F;
-          z-index: 10;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        .map-loading-spinner {
-          width: 40px; height: 40px;
-          border: 2px solid rgba(201,168,76,0.15);
-          border-top-color: #C9A84C;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .map-loading-text {
-          font-family: 'Space Mono', monospace;
-          font-size: 0.65rem;
-          color: rgba(242,232,208,0.4);
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-        }
-
         .map-legend {
           padding: 1.5rem 5vw;
           display: flex;
@@ -409,15 +367,8 @@ export default function MapView({ onSiteClick }) {
 
         {/* Map */}
         <div className="map-container">
-          {!mapLoaded && (
-            <div className="map-loading">
-              <div className="map-loading-spinner" />
-              <div className="map-loading-text">Loading Map...</div>
-            </div>
-          )}
-
-          {/* Scroll zoom shield — shown until user clicks map */}
-          {mapLoaded && !mapActive && (
+          {/* Scroll zoom shield */}
+          {!mapActive && (
             <div
               className="map-scroll-shield"
               ref={shieldRef}

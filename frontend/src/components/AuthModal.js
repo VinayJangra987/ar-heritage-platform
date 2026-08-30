@@ -1,176 +1,220 @@
-// import React, { useState } from 'react';
-// import { useAuth } from '../context/AuthContext';
-// import './AuthModal.css';
 
-// const AuthModal = ({ onClose }) => {
-//   const [mode, setMode] = useState('login'); // 'login' | 'signup'
-//   const [form, setForm] = useState({ name: '', email: '', password: '' });
-//   const [error, setError] = useState('');
-//   const [loading, setLoading] = useState(false);
-//   const { login, signup } = useAuth();
-
-//   const handle = async (e) => {
-//     e.preventDefault();
-//     setError('');
-//     setLoading(true);
-//     await new Promise(r => setTimeout(r, 400)); // slight delay for feel
-
-//     let result;
-//     if (mode === 'login') {
-//       result = login(form.email, form.password);
-//     } else {
-//       if (!form.name.trim()) { setError('Name required!'); setLoading(false); return; }
-//       result = signup(form.name, form.email, form.password);
-//     }
-
-//     setLoading(false);
-//     if (result.success) onClose();
-//     else setError(result.error);
-//   };
-
-//   return (
-//     <div className="auth-overlay" onClick={onClose}>
-//       <div className="auth-modal" onClick={e => e.stopPropagation()}>
-//         {/* Decorative top */}
-//         <div className="auth-top-deco">
-//           <div className="auth-mandala">✦</div>
-//         </div>
-
-//         <button className="auth-close" onClick={onClose}>✕</button>
-
-//         <div className="auth-header">
-//           <h2 className="auth-title">
-//             {mode === 'login' ? 'Welcome Back' : 'Join Heritage'}
-//           </h2>
-//           <p className="auth-sub">
-//             {mode === 'login'
-//               ? 'Continue your journey through India\'s history'
-//               : 'Start exploring 5,000 years of heritage'}
-//           </p>
-//         </div>
-
-//         <div className="auth-tabs">
-//           <button
-//             className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
-//             onClick={() => { setMode('login'); setError(''); }}
-//           >Login</button>
-//           <button
-//             className={`auth-tab ${mode === 'signup' ? 'active' : ''}`}
-//             onClick={() => { setMode('signup'); setError(''); }}
-//           >Sign Up</button>
-//           <div className={`auth-tab-indicator ${mode === 'signup' ? 'right' : ''}`} />
-//         </div>
-
-//         <form className="auth-form" onSubmit={handle}>
-//           {mode === 'signup' && (
-//             <div className="auth-field">
-//               <label>Your Name</label>
-//               <input
-//                 type="text"
-//                 placeholder="Arjun Sharma"
-//                 value={form.name}
-//                 onChange={e => setForm({ ...form, name: e.target.value })}
-//                 required
-//               />
-//             </div>
-//           )}
-//           <div className="auth-field">
-//             <label>Email</label>
-//             <input
-//               type="email"
-//               placeholder="you@example.com"
-//               value={form.email}
-//               onChange={e => setForm({ ...form, email: e.target.value })}
-//               required
-//             />
-//           </div>
-//           <div className="auth-field">
-//             <label>Password</label>
-//             <input
-//               type="password"
-//               placeholder={mode === 'signup' ? 'Min 6 characters' : '••••••••'}
-//               value={form.password}
-//               onChange={e => setForm({ ...form, password: e.target.value })}
-//               minLength={mode === 'signup' ? 6 : undefined}
-//               required
-//             />
-//           </div>
-
-//           {error && <div className="auth-error">⚠ {error}</div>}
-
-//           <button className="auth-submit" type="submit" disabled={loading}>
-//             {loading ? (
-//               <span className="auth-spinner">◌</span>
-//             ) : mode === 'login' ? 'Enter the Journey' : 'Begin Exploring'}
-//           </button>
-//         </form>
-
-//         <p className="auth-switch">
-//           {mode === 'login' ? "New here? " : "Already have an account? "}
-//           <span onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); }}>
-//             {mode === 'login' ? 'Create account' : 'Login'}
-//           </span>
-//         </p>
-
-//         <div className="auth-footer-deco">
-//           <span>🏛</span><span>🕌</span><span>⛩</span><span>🗿</span>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AuthModal;
-
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
-export default function AuthModal({ onClose }) {
-  const [isLogin, setIsLogin]   = useState(true);
-  const [name, setName]         = useState("");
-  const [email, setEmail]       = useState("");
+export default function AuthModal({ onClose, onForgotPassword, initialMode = "login" }) {
+  const [isLogin, setIsLogin] = useState(initialMode !== "signup");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const { login, signup } = useAuth();
+  // ── OTP step ──
+  const [step, setStep] = useState("form"); // "form" | "otp" | "2fa"
+  const [otp, setOtp] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [resendMsg, setResendMsg] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
 
+  // ── 2FA step ──
+  const [twoFACode, setTwoFACode] = useState("");
+  const [pendingPassword, setPendingPassword] = useState("");
+
+  const { login, signup, verifyOTP, resendOTP } = useAuth();
+
+  // App.js jab authMode change kare (Sign In vs Sign Up button), modal usko reflect kare
+  useEffect(() => {
+    setIsLogin(initialMode !== "signup");
+  }, [initialMode]);
+
+  // ── Main form submit (login / signup) ──
   const handleSubmit = async () => {
     setError("");
     setLoading(true);
+
     try {
-      let data;
+      let result;
+
       if (isLogin) {
-        data = await login(email, password);
+        result = await login(email, password);
       } else {
-        data = await signup(name, email, password);
+        result = await signup(name, email, password, confirmPassword);
       }
-      if (data.message && !data.token) {
-        setError(data.message);
-      } else {
+
+      if (result?.requiresOTP) {
+        setPendingEmail(result.email || email);
+        setStep("otp");
+        setError("");
+      } else if (result?.requires2FA) {
+        // Password sahi hai — 2FA code maango
+        setPendingEmail(result.email || email);
+        setPendingPassword(password);
+        setStep("2fa");
+        setError("");
+      } else if (result?.success) {
         onClose();
+      } else {
+        setError(result?.message || "Error!");
       }
     } catch (err) {
-      setError("Something went wrong. Try again.");
+      setError(err.message || "Something went wrong!");
     }
+
     setLoading(false);
   };
 
+  // ── 2FA verify (login ko dobara call karo, ab code ke saath) ──
+  const handleVerify2FA = async () => {
+    if (twoFACode.length !== 6) {
+      setError("6-digit code daalo.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await login(pendingEmail, pendingPassword, twoFACode);
+      if (result?.success) {
+        onClose();
+      } else {
+        setError(result?.message || "Galat code.");
+      }
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    }
+
+    setLoading(false);
+  };
+
+  // ── OTP verify ──
+  const handleVerifyOTP = async () => {
+    if (otp.length !== 6) {
+      setError("6-digit OTP daalo.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await verifyOTP(pendingEmail, otp);
+      if (result?.success) {
+        onClose();
+      } else {
+        setError(result?.message || "Galat OTP.");
+      }
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    }
+
+    setLoading(false);
+  };
+
+  // ── Resend OTP ──
+  const handleResend = async () => {
+    setResendMsg("");
+    setError("");
+    setResendLoading(true);
+    try {
+      const data = await resendOTP(pendingEmail);
+      setResendMsg(data?.message || "OTP bheja gaya.");
+    } catch {
+      setError("Resend failed.");
+    }
+    setResendLoading(false);
+  };
+
+  // ── 2FA Screen ──
+  if (step === "2fa") {
+    return (
+      <div style={overlayStyle}>
+        <div style={cardStyle}>
+          <h2 style={titleStyle}>2FA Code Daalo</h2>
+          <p style={{ color: "rgba(242,232,208,0.6)", fontSize: "0.82rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
+            Apne authenticator app se 6-digit code enter karein.
+          </p>
+
+          <input
+            placeholder="000000"
+            value={twoFACode}
+            onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            maxLength={6}
+            style={{ ...inputStyle, textAlign: "center", fontSize: "1.4rem", letterSpacing: "0.5em" }}
+          />
+
+          {error && <p style={errorStyle}>{error}</p>}
+
+          <button onClick={handleVerify2FA} disabled={loading} style={btnStyle(loading)}>
+            {loading ? "Verifying..." : "VERIFY"}
+          </button>
+
+          <p
+            onClick={() => { setStep("form"); setTwoFACode(""); setError(""); }}
+            style={{ color: "rgba(242,232,208,0.4)", fontSize: "0.72rem", textAlign: "center", marginTop: "1rem", cursor: "pointer" }}
+          >
+            ← Wapas jao
+          </p>
+
+          <button onClick={onClose} style={closeBtn}>✕</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── OTP Screen ──
+  if (step === "otp") {
+    return (
+      <div style={overlayStyle}>
+        <div style={cardStyle}>
+          <h2 style={titleStyle}>Email Verify Karo</h2>
+          <p style={{ color: "rgba(242,232,208,0.6)", fontSize: "0.82rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
+            <span style={{ color: "#C9A84C" }}>{pendingEmail}</span> pe 6-digit OTP bheja gaya hai.
+          </p>
+
+          <input
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            maxLength={6}
+            style={{ ...inputStyle, textAlign: "center", fontSize: "1.4rem", letterSpacing: "0.5em" }}
+          />
+
+          {error && <p style={errorStyle}>{error}</p>}
+          {resendMsg && <p style={{ color: "#4CAF50", fontSize: "0.8rem", marginBottom: "1rem" }}>{resendMsg}</p>}
+
+          <button onClick={handleVerifyOTP} disabled={loading} style={btnStyle(loading)}>
+            {loading ? "Verifying..." : "VERIFY"}
+          </button>
+
+          <p style={{ color: "rgba(242,232,208,0.5)", fontSize: "0.75rem", textAlign: "center", marginTop: "1rem" }}>
+            OTP nahi mila?{" "}
+            <span
+              onClick={resendLoading ? undefined : handleResend}
+              style={{ color: "#C9A84C", cursor: resendLoading ? "default" : "pointer", opacity: resendLoading ? 0.5 : 1 }}
+            >
+              {resendLoading ? "Bhej raha hoon..." : "Resend karo"}
+            </span>
+          </p>
+
+          <p
+            onClick={() => { setStep("form"); setOtp(""); setError(""); setResendMsg(""); }}
+            style={{ color: "rgba(242,232,208,0.4)", fontSize: "0.72rem", textAlign: "center", marginTop: "0.5rem", cursor: "pointer" }}
+          >
+            ← Wapas jao
+          </p>
+
+          <button onClick={onClose} style={closeBtn}>✕</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Login / Signup Screen ──
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: "rgba(0,0,0,0.7)",
-      display: "flex", alignItems: "center", justifyContent: "center"
-    }}>
-      <div style={{
-        background: "#0D1B2A", border: "1px solid rgba(201,168,76,0.3)",
-        borderRadius: "16px", padding: "2rem", width: "360px"
-      }}>
-        <h2 style={{ color: "#C9A84C", fontFamily: "Cormorant Garamond", marginBottom: "1.5rem" }}>
-          {isLogin ? "Login" : "Sign Up"}
-        </h2>
+    <div style={overlayStyle}>
+      <div style={cardStyle}>
+        <h2 style={titleStyle}>{isLogin ? "Login" : "Sign Up"}</h2>
 
         {!isLogin && (
           <input
@@ -194,41 +238,70 @@ export default function AuthModal({ onClose }) {
           style={inputStyle}
         />
 
-        {error && <p style={{ color: "#E24B4A", fontSize: "0.8rem", marginBottom: "1rem" }}>{error}</p>}
+        {!isLogin && (
+          <input
+            placeholder="Confirm Password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            style={inputStyle}
+          />
+        )}
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          style={{
-            width: "100%", padding: "0.85rem",
-            background: "linear-gradient(135deg, #C9A84C, #E8C96A)",
-            color: "#0D1B2A", border: "none", borderRadius: "8px",
-            fontFamily: "Space Mono", fontWeight: 700,
-            fontSize: "0.7rem", letterSpacing: "0.1em",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
+        {error && <p style={errorStyle}>{error}</p>}
+
+        <button onClick={handleSubmit} disabled={loading} style={btnStyle(loading)}>
           {loading ? "Please wait..." : isLogin ? "LOGIN" : "SIGN UP"}
         </button>
+
+        {isLogin && onForgotPassword && (
+          <p
+            onClick={onForgotPassword}
+            style={{ color: "rgba(242,232,208,0.45)", fontSize: "0.72rem", textAlign: "center", marginTop: "0.85rem", cursor: "pointer" }}
+          >
+            Password bhool gaye? <span style={{ color: "#C9A84C" }}>Reset karo</span>
+          </p>
+        )}
 
         <p style={{ color: "rgba(242,232,208,0.5)", fontSize: "0.75rem", textAlign: "center", marginTop: "1rem" }}>
           {isLogin ? "No account? " : "Already have one? "}
           <span
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError("");
+              setName("");
+              setEmail("");
+              setPassword("");
+              setConfirmPassword("");
+            }}
             style={{ color: "#C9A84C", cursor: "pointer" }}
           >
             {isLogin ? "Sign Up" : "Login"}
           </span>
         </p>
 
-        <button
-          onClick={onClose}
-          style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", color: "rgba(242,232,208,0.5)", cursor: "pointer", fontSize: "1.2rem" }}
-        >✕</button>
+        <button onClick={onClose} style={closeBtn}>✕</button>
       </div>
     </div>
   );
 }
+
+// ── Styles ──
+const overlayStyle = {
+  position: "fixed", inset: 0, zIndex: 9999,
+  background: "rgba(0,0,0,0.7)",
+  display: "flex", alignItems: "center", justifyContent: "center",
+};
+
+const cardStyle = {
+  position: "relative",
+  background: "#0D1B2A", border: "1px solid rgba(201,168,76,0.3)",
+  borderRadius: "16px", padding: "2rem", width: "360px",
+};
+
+const titleStyle = {
+  color: "#C9A84C", fontFamily: "Cormorant Garamond", marginBottom: "1.5rem",
+};
 
 const inputStyle = {
   width: "100%", padding: "0.75rem 1rem",
@@ -238,4 +311,24 @@ const inputStyle = {
   fontFamily: "Poppins", fontSize: "0.85rem",
   marginBottom: "1rem", outline: "none",
   boxSizing: "border-box",
+};
+
+const btnStyle = (loading) => ({
+  width: "100%", padding: "0.85rem",
+  background: "linear-gradient(135deg, #C9A84C, #E8C96A)",
+  color: "#0D1B2A", border: "none", borderRadius: "8px",
+  fontFamily: "Space Mono", fontWeight: 700,
+  fontSize: "0.7rem", letterSpacing: "0.1em",
+  cursor: loading ? "not-allowed" : "pointer",
+  opacity: loading ? 0.6 : 1,
+});
+
+const errorStyle = {
+  color: "#E24B4A", fontSize: "0.8rem", marginBottom: "1rem",
+};
+
+const closeBtn = {
+  position: "absolute", top: "1rem", right: "1rem",
+  background: "none", border: "none",
+  color: "rgba(242,232,208,0.5)", cursor: "pointer", fontSize: "1.2rem",
 };

@@ -1,9 +1,8 @@
-// src/components/DiscoveryTour.js
-// Immersive animated heritage tour — triggered by "Begin Discovery"
-
 import { useState, useEffect, useCallback } from "react";
+import ScrollStorySection from "./ScrollStorySection";
+import { useAuth } from "../context/AuthContext";
 
-const SITES = [
+export const SITES = [
   {
     id: "hampi",
     name: "Hampi Ruins",
@@ -12,8 +11,14 @@ const SITES = [
     tagline: "The Lost Empire of Vijayanagara",
     description:
       "Once the world's second-largest medieval city, Hampi was the magnificent capital of the Vijayanagara Empire. Over 1,600 temple ruins stretch across a surreal boulder-strewn landscape along the Tungabhadra river.",
-    facts: ["1,600+ temples", "UNESCO 1986", "Former capital of South India", "Tungabhadra riverside"],
-    image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=1400&q=90",
+    facts: [
+      "1,600+ temples",
+      "UNESCO 1986",
+      "Former capital of South India",
+      "Tungabhadra riverside",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=1400&q=90",
     color: "#C9A84C",
     accent: "#8B6F47",
     num: "01",
@@ -26,8 +31,14 @@ const SITES = [
     tagline: "An Eternal Ode in White Marble",
     description:
       "Built by Mughal Emperor Shah Jahan in memory of his beloved wife Mumtaz Mahal, the Taj Mahal stands as the world's greatest monument to love — a perfect symphony of Persian, Islamic and Indian architecture.",
-    facts: ["22 years to build", "20,000 artisans", "Pure white marble", "UNESCO World Heritage"],
-    image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1400&q=90",
+    facts: [
+      "22 years to build",
+      "20,000 artisans",
+      "Pure white marble",
+      "UNESCO World Heritage",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1400&q=90",
     color: "#E8D5B7",
     accent: "#A0856B",
     num: "02",
@@ -40,8 +51,14 @@ const SITES = [
     tagline: "Where Stone Speaks in Colour",
     description:
       "Carved into a horseshoe-shaped cliff above the Waghora river, the 30 Ajanta Caves preserve India's most breathtaking ancient Buddhist murals — masterpieces of narrative art that have survived over 2,000 years.",
-    facts: ["30 rock-cut caves", "Finest Asian murals", "UNESCO 1983", "Buddhist heritage"],
-    image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=1400&q=90",
+    facts: [
+      "30 rock-cut caves",
+      "Finest Asian murals",
+      "UNESCO 1983",
+      "Buddhist heritage",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=1400&q=90",
     color: "#E07B54",
     accent: "#8B5E3C",
     num: "03",
@@ -54,33 +71,47 @@ const SITES = [
     tagline: "The Golden Fortress of the Rajputs",
     description:
       "Perched dramatically on a rugged hilltop overlooking Maota Lake, Amber Fort is a masterpiece of Rajput military architecture. Its blend of Hindu and Mughal styles created one of India's most photographed monuments.",
-    facts: ["Built in 1592", "Sheesh Mahal mirror palace", "UNESCO 2013", "Rajput architecture"],
-    image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1400&q=90",
+    facts: [
+      "Built in 1592",
+      "Sheesh Mahal mirror palace",
+      "UNESCO 2013",
+      "Rajput architecture",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1400&q=90",
     color: "#D4A84C",
     accent: "#8B6914",
     num: "04",
   },
 ];
 
-export default function DiscoveryTour({ onClose, onViewAR }) {
-  const [current, setCurrent]   = useState(0);
-  const [animDir, setAnimDir]   = useState("next"); // "next" | "prev"
+export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
+  const { user } = useAuth();
+
+  const [current, setCurrent] = useState(0);
+  const [animDir, setAnimDir] = useState("next");
   const [transitioning, setTransitioning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [paused, setPaused]     = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [inDepthSite, setInDepthSite] = useState(null);
 
-  const DURATION = 6000; // ms per slide
+  const DURATION = 6000;
 
-  const goTo = useCallback((index, dir = "next") => {
-    if (transitioning) return;
-    setAnimDir(dir);
-    setTransitioning(true);
-    setProgress(0);
-    setTimeout(() => {
-      setCurrent(index);
-      setTransitioning(false);
-    }, 600);
-  }, [transitioning]);
+  const goTo = useCallback(
+    (index, dir = "next") => {
+      if (transitioning) return;
+
+      setAnimDir(dir);
+      setTransitioning(true);
+      setProgress(0);
+
+      setTimeout(() => {
+        setCurrent(index);
+        setTransitioning(false);
+      }, 600);
+    },
+    [transitioning]
+  );
 
   const next = useCallback(() => {
     goTo((current + 1) % SITES.length, "next");
@@ -90,31 +121,96 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
     goTo((current - 1 + SITES.length) % SITES.length, "prev");
   }, [current, goTo]);
 
-  // Auto-advance
   useEffect(() => {
-    if (paused) return;
+    if (paused || inDepthSite) return;
+
     const interval = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) { next(); return 0; }
-        return p + (100 / (DURATION / 100));
+      setProgress((p) => {
+        if (p >= 100) {
+          next();
+          return 0;
+        }
+
+        return p + 100 / (DURATION / 100);
       });
     }, 100);
-    return () => clearInterval(interval);
-  }, [paused, next]);
 
-  // Keyboard
+    return () => clearInterval(interval);
+  }, [paused, next, inDepthSite]);
+
   useEffect(() => {
     const handler = (e) => {
+      if (inDepthSite) {
+        if (e.key === "Escape") {
+          setInDepthSite(null);
+        }
+        return;
+      }
+
       if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft")  prev();
-      if (e.key === "Escape")     onClose();
-      if (e.key === " ")          setPaused(p => !p);
+      if (e.key === "ArrowLeft") prev();
+
+      if (e.key === "Escape") {
+        onClose();
+      }
+
+      if (e.key === " ") {
+        e.preventDefault();
+        setPaused((p) => !p);
+      }
     };
+
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [next, prev, onClose]);
+
+    return () => {
+      window.removeEventListener("keydown", handler);
+    };
+  }, [next, prev, onClose, inDepthSite]);
 
   const site = SITES[current];
+
+  // ─────────────────────────────────────────────
+  // IN-DEPTH STORY
+  // ─────────────────────────────────────────────
+  if (inDepthSite) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 10050,
+          overflowY: "auto",
+          background: "#0D1B2A",
+        }}
+      >
+        <button
+          onClick={() => setInDepthSite(null)}
+          style={{
+            position: "fixed",
+            top: "1.5rem",
+            right: "1.5rem",
+            zIndex: 10060,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            color: "#F2E8D0",
+            fontSize: "1rem",
+            cursor: "pointer",
+          }}
+          title="Back to tour"
+        >
+          ✕
+        </button>
+
+        <ScrollStorySection
+          site={inDepthSite}
+          onViewAR={onViewAR}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -122,27 +218,36 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
 
         .dt-overlay {
-          position: fixed; inset: 0; z-index: 10000;
+          position: fixed;
+          inset: 0;
+          z-index: 10000;
           background: #050A0F;
           font-family: 'DM Sans', sans-serif;
           overflow: hidden;
         }
 
-        /* ── Background image ── */
         .dt-bg {
-          position: absolute; inset: 0;
+          position: absolute;
+          inset: 0;
           transition: opacity 0.6s ease;
         }
+
         .dt-bg img {
-          width: 100%; height: 100%;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
           filter: brightness(0.35) saturate(0.8);
           transition: transform 8s ease;
           transform: scale(1.08);
         }
-        .dt-bg.playing img { transform: scale(1); }
+
+        .dt-bg.playing img {
+          transform: scale(1);
+        }
+
         .dt-bg-gradient {
-          position: absolute; inset: 0;
+          position: absolute;
+          inset: 0;
           background: linear-gradient(
             105deg,
             rgba(5,10,15,0.95) 0%,
@@ -151,26 +256,44 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           );
         }
 
-        /* ── Slide transition ── */
         .dt-content {
-          position: absolute; inset: 0;
+          position: absolute;
+          inset: 0;
           display: flex;
           flex-direction: column;
           justify-content: center;
           padding: 0 8vw;
           transition: opacity 0.5s ease, transform 0.5s ease;
+          z-index: 10;
         }
-        .dt-content.exit-next  { opacity: 0; transform: translateX(-60px); }
-        .dt-content.exit-prev  { opacity: 0; transform: translateX(60px); }
-        .dt-content.enter      { opacity: 1; transform: translateX(0); }
 
-        /* ── Top bar ── */
+        .dt-content.exit-next {
+          opacity: 0;
+          transform: translateX(-60px);
+        }
+
+        .dt-content.exit-prev {
+          opacity: 0;
+          transform: translateX(60px);
+        }
+
+        .dt-content.enter {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
         .dt-topbar {
-          position: absolute; top: 0; left: 0; right: 0;
-          display: flex; align-items: center; justify-content: space-between;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           padding: 1.5rem 2.5rem;
           z-index: 20;
         }
+
         .dt-logo {
           font-family: 'Space Mono', monospace;
           font-size: 0.6rem;
@@ -178,35 +301,43 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           color: rgba(255,255,255,0.35);
           text-transform: uppercase;
         }
-        .dt-topbar-right {
-          display: flex; align-items: center; gap: 0.75rem;
-        }
-        .dt-pause-btn {
-          width: 36px; height: 36px;
-          display: flex; align-items: center; justify-content: center;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 50%;
-          color: rgba(255,255,255,0.5);
-          font-size: 0.75rem;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .dt-pause-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-        .dt-close-btn {
-          width: 36px; height: 36px;
-          display: flex; align-items: center; justify-content: center;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 50%;
-          color: rgba(255,255,255,0.5);
-          font-size: 1rem;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .dt-close-btn:hover { background: rgba(201,168,76,0.2); border-color: rgba(201,168,76,0.4); color: #C9A84C; }
 
-        /* ── Site number ── */
+        .dt-topbar-right {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .dt-pause-btn,
+        .dt-close-btn {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 50%;
+          color: rgba(255,255,255,0.5);
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .dt-pause-btn {
+          font-size: 0.75rem;
+        }
+
+        .dt-close-btn {
+          font-size: 1rem;
+        }
+
+        .dt-pause-btn:hover,
+        .dt-close-btn:hover {
+          background: rgba(201,168,76,0.2);
+          border-color: rgba(201,168,76,0.4);
+          color: #C9A84C;
+        }
+
         .dt-num {
           font-family: 'Playfair Display', serif;
           font-size: clamp(6rem, 14vw, 12rem);
@@ -220,9 +351,9 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           transform: translateY(-50%);
           pointer-events: none;
           user-select: none;
+          z-index: 1;
         }
 
-        /* ── Main content ── */
         .dt-eyebrow {
           font-family: 'Space Mono', monospace;
           font-size: 0.58rem;
@@ -230,11 +361,15 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           text-transform: uppercase;
           color: var(--site-color, #C9A84C);
           margin-bottom: 1.2rem;
-          display: flex; align-items: center; gap: 0.8rem;
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
         }
+
         .dt-eyebrow::before {
           content: '';
-          width: 40px; height: 1px;
+          width: 40px;
+          height: 1px;
           background: var(--site-color, #C9A84C);
         }
 
@@ -257,7 +392,8 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
         }
 
         .dt-divider {
-          width: 60px; height: 2px;
+          width: 60px;
+          height: 2px;
           background: var(--site-color, #C9A84C);
           margin-bottom: 1.8rem;
           border-radius: 2px;
@@ -271,11 +407,13 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           margin-bottom: 2.5rem;
         }
 
-        /* ── Facts row ── */
         .dt-facts {
-          display: flex; flex-wrap: wrap; gap: 0.6rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
           margin-bottom: 3rem;
         }
+
         .dt-fact {
           font-family: 'Space Mono', monospace;
           font-size: 0.55rem;
@@ -288,16 +426,18 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           padding: 5px 12px;
         }
 
-        /* ── Action buttons ── */
         .dt-actions {
-          display: flex; gap: 1rem; flex-wrap: wrap;
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
         }
-        .dt-btn-primary {
-          display: flex; align-items: center; gap: 0.6rem;
+
+        .dt-btn-primary,
+        .dt-btn-secondary {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
           padding: 0.9rem 2rem;
-          background: linear-gradient(135deg, var(--site-color, #C9A84C), #E8C96A);
-          color: #0D1B2A;
-          border: none;
           border-radius: 4px;
           font-family: 'Space Mono', monospace;
           font-size: 0.6rem;
@@ -307,35 +447,39 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           cursor: pointer;
           transition: all 0.25s;
         }
+
+        .dt-btn-primary {
+          background: linear-gradient(
+            135deg,
+            var(--site-color, #C9A84C),
+            #E8C96A
+          );
+          color: #0D1B2A;
+          border: none;
+        }
+
         .dt-btn-primary:hover {
           transform: translateY(-2px);
           box-shadow: 0 10px 30px rgba(201,168,76,0.35);
         }
+
         .dt-btn-secondary {
-          display: flex; align-items: center; gap: 0.6rem;
-          padding: 0.9rem 2rem;
           background: transparent;
           color: rgba(245,239,224,0.7);
           border: 1px solid rgba(245,239,224,0.2);
-          border-radius: 4px;
-          font-family: 'Space Mono', monospace;
-          font-size: 0.6rem;
-          font-weight: 700;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.25s;
         }
+
         .dt-btn-secondary:hover {
           background: rgba(201,168,76,0.08);
           border-color: rgba(201,168,76,0.4);
           color: #C9A84C;
         }
 
-        /* ── Bottom nav ── */
         .dt-bottom {
           position: absolute;
-          bottom: 0; left: 0; right: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
           padding: 1.5rem 2.5rem;
           display: flex;
           align-items: center;
@@ -343,10 +487,12 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           z-index: 20;
         }
 
-        /* Progress bars */
         .dt-progress-bars {
-          display: flex; gap: 6px; align-items: center;
+          display: flex;
+          gap: 6px;
+          align-items: center;
         }
+
         .dt-progress-bar {
           height: 2px;
           background: rgba(255,255,255,0.15);
@@ -355,23 +501,37 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           cursor: pointer;
           transition: width 0.3s ease;
         }
-        .dt-progress-bar.active { width: 60px; }
-        .dt-progress-bar:not(.active) { width: 20px; }
+
+        .dt-progress-bar.active {
+          width: 60px;
+        }
+
+        .dt-progress-bar:not(.active) {
+          width: 20px;
+        }
+
         .dt-progress-fill {
           height: 100%;
           background: #C9A84C;
           border-radius: 2px;
           transition: width 0.1s linear;
         }
+
         .dt-progress-bar:not(.active) .dt-progress-fill {
           width: 0%;
         }
 
-        /* Prev / next arrows */
-        .dt-nav-arrows { display: flex; gap: 0.5rem; }
+        .dt-nav-arrows {
+          display: flex;
+          gap: 0.5rem;
+        }
+
         .dt-arrow {
-          width: 44px; height: 44px;
-          display: flex; align-items: center; justify-content: center;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.1);
           border-radius: 50%;
@@ -380,36 +540,44 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           cursor: pointer;
           transition: all 0.2s;
         }
+
         .dt-arrow:hover {
           background: rgba(201,168,76,0.15);
           border-color: rgba(201,168,76,0.4);
           color: #C9A84C;
         }
 
-        /* Counter */
         .dt-counter {
           font-family: 'Space Mono', monospace;
           font-size: 0.6rem;
           color: rgba(255,255,255,0.25);
           letter-spacing: 0.1em;
         }
-        .dt-counter span { color: rgba(255,255,255,0.55); }
 
-        /* State indicator dot */
+        .dt-counter span {
+          color: rgba(255,255,255,0.55);
+        }
+
         .dt-state-row {
-          display: flex; align-items: center; gap: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
           margin-bottom: 2rem;
         }
+
         .dt-state-dot {
-          width: 6px; height: 6px;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
           background: var(--site-color, #C9A84C);
           animation: dtPulse 2s infinite;
         }
+
         @keyframes dtPulse {
           0%,100% { opacity: 1; }
           50% { opacity: 0.3; }
         }
+
         .dt-state-text {
           font-family: 'Space Mono', monospace;
           font-size: 0.5rem;
@@ -418,36 +586,153 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
           color: rgba(255,255,255,0.25);
         }
 
-        /* Right side image panel */
         .dt-right-panel {
           position: absolute;
-          right: 0; top: 0; bottom: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
           width: 38%;
           overflow: hidden;
           pointer-events: none;
         }
+
         .dt-right-img {
-          width: 100%; height: 100%;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
           filter: brightness(0.5) saturate(0.7);
-          mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.7) 40%, black 100%);
-          -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.7) 40%, black 100%);
+          mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            rgba(0,0,0,0.7) 40%,
+            black 100%
+          );
+          -webkit-mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            rgba(0,0,0,0.7) 40%,
+            black 100%
+          );
           transition: opacity 0.6s ease;
         }
+
         .dt-right-overlay {
-          position: absolute; inset: 0;
-          background: linear-gradient(to right, #050A0F 0%, transparent 40%);
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            to right,
+            #050A0F 0%,
+            transparent 40%
+          );
         }
 
-        /* Mobile */
+        /* ───────────────────────────────────────
+           ANNOUNCEMENT BAR
+        ─────────────────────────────────────── */
+
+        .dt-announce-bar {
+          position: absolute;
+          top: 70px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 25;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          background: rgba(4,8,15,0.75);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(201,168,76,0.25);
+          border-radius: 50px;
+          padding: 0.5rem 0.5rem 0.5rem 1.1rem;
+          max-width: 92vw;
+        }
+
+        .dt-announce-text {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.72rem;
+          color: rgba(245,239,224,0.75);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .dt-announce-icon {
+          margin-right: 4px;
+        }
+
+        .dt-announce-btn {
+          flex-shrink: 0;
+          padding: 0.45rem 1.1rem;
+          border-radius: 50px;
+          border: none;
+          background: linear-gradient(135deg, #C9A84C, #E8C96A);
+          color: #0D1B2A;
+          font-family: 'Space Mono', monospace;
+          font-size: 0.55rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: transform 0.2s;
+        }
+
+        .dt-announce-btn:hover {
+          transform: translateY(-1px);
+        }
+
         @media (max-width: 768px) {
-          .dt-content { padding: 0 6vw; justify-content: flex-end; padding-bottom: 140px; }
-          .dt-right-panel { display: none; }
-          .dt-num { font-size: 5rem; right: 4vw; opacity: 0.4; }
-          .dt-title { font-size: 2.4rem; }
-          .dt-description { font-size: 0.85rem; }
-          .dt-actions { flex-direction: column; }
-          .dt-btn-primary, .dt-btn-secondary { justify-content: center; }
+          .dt-content {
+            padding: 0 6vw;
+            justify-content: flex-end;
+            padding-bottom: 140px;
+          }
+
+          .dt-right-panel {
+            display: none;
+          }
+
+          .dt-num {
+            font-size: 5rem;
+            right: 4vw;
+            opacity: 0.4;
+          }
+
+          .dt-title {
+            font-size: 2.4rem;
+          }
+
+          .dt-description {
+            font-size: 0.85rem;
+          }
+
+          .dt-actions {
+            flex-direction: column;
+          }
+
+          .dt-btn-primary,
+          .dt-btn-secondary {
+            justify-content: center;
+          }
+
+          .dt-announce-bar {
+            top: 62px;
+            padding: 0.4rem 0.4rem 0.4rem 0.8rem;
+            gap: 0.6rem;
+          }
+
+          .dt-announce-text {
+            font-size: 0.62rem;
+          }
+
+          .dt-announce-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.5rem;
+          }
+
+          .dt-bottom {
+            padding: 1rem;
+          }
         }
       `}</style>
 
@@ -461,6 +746,7 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
             alt={site.name}
             className="playing"
           />
+
           <div className="dt-bg-gradient" />
         </div>
 
@@ -472,94 +758,196 @@ export default function DiscoveryTour({ onClose, onViewAR }) {
             alt={site.name}
             className="dt-right-img"
           />
+
           <div className="dt-right-overlay" />
         </div>
 
         {/* Ghost number */}
-        <div className="dt-num" style={{ "--site-color": site.color }}>{site.num}</div>
+        <div
+          className="dt-num"
+          style={{ "--site-color": site.color }}
+        >
+          {site.num}
+        </div>
 
         {/* Top bar */}
         <div className="dt-topbar">
-          <div className="dt-logo">Bharatiya Dharohar · Heritage Tour</div>
+          <div className="dt-logo">
+            Bharatiya Dharohar · Heritage Tour
+          </div>
+
           <div className="dt-topbar-right">
             <button
               className="dt-pause-btn"
-              onClick={() => setPaused(p => !p)}
+              onClick={() => setPaused((p) => !p)}
               title={paused ? "Play" : "Pause"}
             >
               {paused ? "▶" : "⏸"}
             </button>
-            <button className="dt-close-btn" onClick={onClose}>✕</button>
+
+            <button
+              className="dt-close-btn"
+              onClick={onClose}
+            >
+              ✕
+            </button>
           </div>
+        </div>
+
+        {/* ─────────────────────────────────────
+            ANNOUNCEMENT BAR
+            ───────────────────────────────────── */}
+
+        <div className="dt-announce-bar">
+          <div className="dt-announce-text">
+            <span className="dt-announce-icon">📢</span>
+            Heritage Fest 2026 · 28 Nov · Red Fort — limited seats
+          </div>
+          <button
+            className="dt-announce-btn"
+            onClick={() => {
+              if (!user) {
+                onShowAuth && onShowAuth();
+                return;
+              }
+              console.log("Heritage ticket reservation:", site.name);
+            }}
+          >
+            {user ? "🎟 Reserve Seat" : "🔒 Sign in to Reserve"}
+          </button>
         </div>
 
         {/* Main slide content */}
         <div
-          className={`dt-content ${transitioning ? `exit-${animDir}` : "enter"}`}
+          className={`dt-content ${
+            transitioning
+              ? `exit-${animDir}`
+              : "enter"
+          }`}
           style={{ "--site-color": site.color }}
         >
           <div className="dt-state-row">
             <div className="dt-state-dot" />
-            <div className="dt-state-text">Live · Heritage Discovery</div>
+            <div className="dt-state-text">
+              Live · Heritage Discovery
+            </div>
           </div>
 
           <div className="dt-eyebrow">
             {site.state} &nbsp;·&nbsp; {site.era}
           </div>
 
-          <h1 className="dt-title">{site.name}</h1>
-          <div className="dt-tagline">{site.tagline}</div>
+          <h1 className="dt-title">
+            {site.name}
+          </h1>
+
+          <div className="dt-tagline">
+            {site.tagline}
+          </div>
+
           <div className="dt-divider" />
-          <p className="dt-description">{site.description}</p>
+
+          <p className="dt-description">
+            {site.description}
+          </p>
 
           <div className="dt-facts">
             {site.facts.map((f, i) => (
-              <span key={i} className="dt-fact">✦ {f}</span>
+              <span
+                key={i}
+                className="dt-fact"
+              >
+                ✦ {f}
+              </span>
             ))}
           </div>
 
           <div className="dt-actions">
+
             <button
               className="dt-btn-primary"
-              onClick={() => onViewAR && onViewAR(site)}
+              onClick={() =>
+                onViewAR && onViewAR(site)
+              }
             >
               📱 View in AR
             </button>
+
+            {/* Explore in depth */}
+            <button
+              className="dt-btn-secondary"
+              onClick={() => setInDepthSite(site)}
+            >
+              ↓ Explore in Depth
+            </button>
+
             <button
               className="dt-btn-secondary"
               onClick={next}
             >
               Next Site →
             </button>
+
           </div>
         </div>
 
         {/* Bottom controls */}
         <div className="dt-bottom">
+
           <div className="dt-progress-bars">
             {SITES.map((s, i) => (
               <div
                 key={s.id}
-                className={`dt-progress-bar ${i === current ? "active" : ""}`}
-                onClick={() => goTo(i, i > current ? "next" : "prev")}
+                className={`dt-progress-bar ${
+                  i === current ? "active" : ""
+                }`}
+                onClick={() =>
+                  goTo(
+                    i,
+                    i > current ? "next" : "prev"
+                  )
+                }
                 title={s.name}
               >
                 <div
                   className="dt-progress-fill"
-                  style={{ width: i === current ? `${progress}%` : i < current ? "100%" : "0%" }}
+                  style={{
+                    width:
+                      i === current
+                        ? `${progress}%`
+                        : i < current
+                        ? "100%"
+                        : "0%",
+                  }}
                 />
               </div>
             ))}
           </div>
 
           <div className="dt-counter">
-            <span>{String(current + 1).padStart(2, "0")}</span> / {String(SITES.length).padStart(2, "0")}
+            <span>
+              {String(current + 1).padStart(2, "0")}
+            </span>{" "}
+            /{" "}
+            {String(SITES.length).padStart(2, "0")}
           </div>
 
           <div className="dt-nav-arrows">
-            <button className="dt-arrow" onClick={prev}>←</button>
-            <button className="dt-arrow" onClick={next}>→</button>
+            <button
+              className="dt-arrow"
+              onClick={prev}
+            >
+              ←
+            </button>
+
+            <button
+              className="dt-arrow"
+              onClick={next}
+            >
+              →
+            </button>
           </div>
+
         </div>
 
       </div>

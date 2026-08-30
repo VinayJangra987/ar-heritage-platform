@@ -1,0 +1,83 @@
+.auth-choice-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 15, 35, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.auth-choice-card {
+  background: rgba(15, 25, 50, 0.95);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+.auth-choice-logo {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.auth-choice-title {
+  color: #d4af37;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.auth-choice-subtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  margin-bottom: 1.8rem;
+}
+
+.auth-choice-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.auth-choice-btn {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.login-btn {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  color: #d4af37;
+}
+.login-btn:hover { background: rgba(212, 175, 55, 0.25); }
+
+.signup-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+.signup-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+.admin-btn {
+  background: rgba(201, 80, 80, 0.12);
+  border-color: rgba(201, 80, 80, 0.35);
+  color: #e08080;
+}
+.admin-btn:hover { background: rgba(201, 80, 80, 0.22); }
+
+.guest-btn {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+}
+.guest-btn:hover { color: rgba(255, 255, 255, 0.8); }

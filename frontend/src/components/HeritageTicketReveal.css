@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;600;700&display=swap');
+
+.htr-root{
+  --navy: #04080F; --navy-2:#0B1424; --navy-3:#10192C;
+  --gold: #C9A84C; --gold-light:#E8D9A8; --ivory:#F3EEE1;
+  --line: rgba(201,168,76,0.28);
+  position:relative;
+  font-family:'Inter',sans-serif;
+  color:var(--ivory);
+  touch-action:none;
+}
+
+.htr-root.htr-section{
+  width:100%; min-height:520px; display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(201,168,76,0.10), transparent 45%),
+    radial-gradient(circle at 82% 78%, rgba(201,168,76,0.08), transparent 40%),
+    var(--navy);
+  border-radius:16px; overflow:hidden; padding:80px 16px;
+}
+
+.htr-root.htr-promo{ width:220px; }
+
+.htr-headline{ position:absolute; top:24px; left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; }
+.htr-headline .eyebrow{ font-size:0.68rem; font-weight:600; letter-spacing:0.28em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+.htr-headline h2{ margin:0; font-family:'Cormorant Garamond', serif; font-weight:600; font-size:clamp(1.8rem,5vw,3rem); color:var(--ivory); }
+.htr-headline .rule{ width:56px; height:1px; background:var(--gold); margin:14px auto 0; opacity:0.6; }
+
+.htr-ticket-wrap{ position:relative; z-index:2; }
+
+.htr-ticket{
+  position:relative; display:flex; width:min(520px,84vw);
+  background:linear-gradient(160deg, var(--navy-3), var(--navy-2));
+  border:1px solid var(--line); border-radius:10px;
+  box-shadow:0 24px 50px rgba(0,0,0,0.55);
+  cursor:grab; transform:rotate(-1.4deg);
+  transition:transform .6s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+}
+.htr-promo .htr-ticket{ width:200px; }
+.htr-promo .htr-ticket-title{ font-size:1rem; }
+.htr-promo .htr-ticket-meta span{ font-size:0.68rem; }
+.htr-promo .htr-ticket-eyebrow{ font-size:0.5rem; }
+
+.htr-ticket.dragging{ cursor:grabbing; }
+.htr-ticket.floating{ animation:htr-float 5s ease-in-out infinite; }
+.htr-ticket.unsealed{ opacity:0; transform:scale(0.9) rotate(4deg) !important; }
+@keyframes htr-float{ 0%,100%{margin-top:0;} 50%{margin-top:-8px;} }
+
+.htr-ticket-main{ flex:1; padding:1.5rem 1.4rem; display:flex; flex-direction:column; justify-content:space-between; gap:1rem; }
+.htr-ticket-eyebrow{ font-size:0.62rem; font-weight:700; letter-spacing:0.24em; color:var(--gold); text-transform:uppercase; }
+.htr-ticket-title{ font-family:'Cormorant Garamond', serif; font-weight:600; font-size:clamp(1.5rem,4vw,2.2rem); color:var(--ivory); line-height:1.02; }
+.htr-ticket-title em{ font-style:italic; color:var(--gold-light); }
+.htr-ticket-meta{ display:flex; justify-content:space-between; align-items:flex-end; border-top:1px dashed var(--line); padding-top:0.85rem; }
+.htr-ticket-meta div{ display:flex; flex-direction:column; gap:3px; }
+.htr-ticket-meta label{ font-size:0.52rem; font-weight:700; letter-spacing:0.14em; color:rgba(243,238,225,0.45); text-transform:uppercase; }
+.htr-ticket-meta span{ font-weight:600; color:var(--ivory); }
+
+.htr-ticket-stub{ width:100px; position:relative; padding:1.2rem 0.5rem; display:flex; align-items:center; justify-content:center;
+  border-left:1px dashed var(--line); background:rgba(0,0,0,0.18); border-radius:0 10px 10px 0; }
+.htr-ticket-stub span{ writing-mode:vertical-rl; transform:rotate(180deg); font-weight:700; letter-spacing:0.2em; font-size:0.68rem; color:var(--gold-light); text-transform:uppercase; }
+.htr-hole{ position:absolute; width:16px; height:16px; border-radius:50%; background:var(--navy); left:-1px; }
+.htr-hole.top{ top:-8px; } .htr-hole.bottom{ bottom:-8px; }
+
+.htr-seal{ position:absolute; top:50%; left:calc(100% - 118px); transform:translate(-50%,-50%); width:44px; height:44px; z-index:5; }
+.htr-promo .htr-seal{ left:calc(100% - 46px); width:32px; height:32px; }
+.htr-seal-half{ position:absolute; inset:0; border-radius:50%; transition:transform .5s cubic-bezier(.22,1,.36,1); }
+.htr-seal-half svg{ width:100%; height:100%; display:block; }
+.htr-seal-half.left{ clip-path:inset(0 50% 0 0); }
+.htr-seal-half.right{ clip-path:inset(0 0 0 50%); }
+
+.htr-hint{ position:absolute; bottom:24px; left:50%; transform:translateX(-50%);
+  font-weight:600; font-size:0.68rem; letter-spacing:0.16em; text-transform:uppercase;
+  color:var(--gold-light); display:flex; align-items:center; gap:8px; transition:opacity .5s ease; opacity:0.85; }
+.htr-hint.hide{ opacity:0; }
+.htr-promo .htr-hint{ font-size:0.5rem; bottom:-24px; white-space:nowrap; }
+
+.htr-modal-backdrop{ position:fixed; inset:0; z-index:1000; background:rgba(4,8,15,0.72);
+  display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .35s ease; }
+.htr-modal-backdrop.show{ opacity:1; pointer-events:auto; }
+.htr-modal{ width:min(420px,86vw); background:linear-gradient(165deg, var(--navy-3), var(--navy-2));
+  border:1px solid var(--line); border-radius:14px; padding:2rem 1.8rem 1.8rem; text-align:center;
+  transform:translateY(18px) scale(0.96); transition:transform .4s cubic-bezier(.22,1,.36,1); position:relative;
+  font-family:'Inter',sans-serif; color:var(--ivory); }
+.htr-modal-backdrop.show .htr-modal{ transform:translateY(0) scale(1); }
+.htr-modal .htr-rule-sm{ width:40px; height:1px; background:var(--gold); margin:0 auto 14px; }
+.htr-modal h3{ font-family:'Cormorant Garamond', serif; font-weight:600; font-style:italic; color:var(--ivory); font-size:1.6rem; margin:0 0 6px; }
+.htr-modal p.htr-desc{ font-size:0.82rem; color:rgba(243,238,225,0.65); line-height:1.55; margin:0 0 20px; }
+.htr-tiers{ display:flex; gap:10px; margin-bottom:20px; }
+.htr-tier{ flex:1; border:1px solid var(--line); border-radius:8px; padding:12px 8px; }
+.htr-tier label{ display:block; font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold-light); margin-bottom:4px; }
+.htr-tier span{ font-weight:700; font-size:0.95rem; color:var(--ivory); }
+.htr-cta{ width:100%; padding:13px; border-radius:8px; border:none; cursor:pointer;
+  background:var(--gold); color:var(--navy); font-weight:700; font-size:0.8rem;
+  letter-spacing:0.06em; text-transform:uppercase; transition:background .2s ease; }
+.htr-cta:hover{ background:var(--gold-light); }
+.htr-modal-note{ margin-top:12px; font-size:0.66rem; color:rgba(243,238,225,0.4); }
+.htr-close-x{ position:absolute; top:14px; right:16px; background:none; border:none; color:var(--gold-light);
+  font-size:1.1rem; cursor:pointer; opacity:0.7; }
+.htr-close-x:hover{ opacity:1; }

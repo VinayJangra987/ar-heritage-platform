@@ -5,9 +5,15 @@ import heritageData from '../data/heritage';
 export default function FavoritesSection({ onSiteClick, onShowAuth }) {
   const { user, toggleFavorite } = useAuth();
 
-  const allSites   = heritageData.getAllSites();
-  const favSites   = user?.favorites
-    ? allSites.filter(s => user.favorites.includes(s.id))
+  const allSites = heritageData.getAllSites();
+
+  // ✅ FIX — id aur _id dono check karo (MongoDB _id vs local id)
+  const favSites = user?.favorites
+    ? allSites.filter(s =>
+        user.favorites.includes(s.id) ||
+        user.favorites.includes(s._id) ||
+        user.favorites.includes(String(s.id))
+      )
     : [];
 
   const typeColors = {
@@ -86,7 +92,7 @@ export default function FavoritesSection({ onSiteClick, onShowAuth }) {
           {/* Cards grid */}
           <div className="fav-grid">
             {favSites.map(site => (
-              <div key={site.id} className="fav-card" onClick={() => onSiteClick(site)}>
+              <div key={site.id || site._id} className="fav-card" onClick={() => onSiteClick(site)}>
 
                 {/* Image */}
                 <div className="fav-card-img-wrap">
@@ -98,7 +104,7 @@ export default function FavoritesSection({ onSiteClick, onShowAuth }) {
                   {/* Remove fav button */}
                   <button
                     className="fav-card-remove"
-                    onClick={e => { e.stopPropagation(); toggleFavorite(site.id); }}
+                    onClick={e => { e.stopPropagation(); toggleFavorite(site.id || site._id); }}
                     title="Remove from favourites"
                   >
                     ♥
@@ -303,7 +309,6 @@ const favStyles = `
     transform: scale(1.05);
   }
 
-  /* Remove button */
   .fav-card-remove {
     position: absolute;
     top: 10px; right: 10px;
@@ -342,7 +347,6 @@ const favStyles = `
     border: 2px solid rgba(255,255,255,0.5);
   }
 
-  /* Card info */
   .fav-card-info {
     padding: 1rem 1.1rem 1.1rem;
   }
