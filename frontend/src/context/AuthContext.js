@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const AuthContext = createContext();
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_BASE = "https://ar-heritage-platform.onrender.com";
 
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null);
