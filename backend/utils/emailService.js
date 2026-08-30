@@ -1,42 +1,38 @@
-// utils/emailService.js
-const nodemailer = require("nodemailer");
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // true for port 465
-  family: 4,    // force IPv4 — fixes Render ENETUNREACH on IPv6
-  auth: {
-    user: process.env.EMAIL_USER,      // tumhara email
-    pass: process.env.EMAIL_PASS,      // app password (Gmail App Password)
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-exports.sendOTPEmail = async (toEmail, otp, name) => {
-  const mailOptions = {
-    from: `"Heritage India" <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: "Verify Your Email - Heritage India",
+// ── Send OTP Email (generic, used for signup + password reset) ──
+export const sendOTPEmail = async (email, otp, name, purpose = "verify") => {
+  const subject =
+    purpose === "reset"
+      ? "Password Reset OTP - Bharatiya Dharohar"
+      : "Your OTP - Bharatiya Dharohar";
+
+  const introLine =
+    purpose === "reset"
+      ? "Your OTP to reset your password is:"
+      : "Your OTP code is:";
+
+  const { error } = await resend.emails.send({
+    from: "Bharatiya Dharohar <onboarding@resend.dev>",
+    to: email,
+    subject,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; 
-                  background: #1a2332; color: #fff; padding: 32px; border-radius: 12px;">
-        <h2 style="color: #e6b84a; margin-bottom: 8px;">Heritage India</h2>
-        <p style="color: #aaa; margin-top: 0;">AN HERITAGE PLATFORM — INDIA</p>
-        <hr style="border-color: #333; margin: 20px 0;" />
-        <p>Namaste <strong>${name}</strong>,</p>
-        <p>Apna account verify karne ke liye neeche diya gaya OTP use karein:</p>
-        <div style="background: #e6b84a; color: #1a2332; font-size: 32px; 
-                    font-weight: bold; text-align: center; padding: 16px; 
-                    border-radius: 8px; letter-spacing: 8px; margin: 24px 0;">
+      <div style="font-family:sans-serif;max-width:480px;margin:auto;background:#0D1B2A;color:#F2E8D0;padding:2rem;border-radius:12px;">
+        <h2 style="color:#C9A84C;margin-bottom:0.5rem;">🏛 Bharatiya Dharohar</h2>
+        <p>Hello <strong>${name}</strong>,</p>
+        <p>${introLine}</p>
+        <div style="font-size:2.5rem;font-weight:700;letter-spacing:0.3em;color:#C9A84C;text-align:center;padding:1rem;background:rgba(201,168,76,0.1);border-radius:8px;margin:1rem 0;">
           ${otp}
         </div>
-        <p style="color: #aaa; font-size: 13px;">
-          ⚠️ Yeh OTP <strong>10 minutes</strong> mein expire ho jayega.<br/>
-          Agar aapne signup nahi kiya toh is email ko ignore karein.
-        </p>
+        <p style="color:rgba(242,232,208,0.5);font-size:0.85rem;">This OTP expires in 10 minutes.</p>
+        <p style="color:rgba(242,232,208,0.5);font-size:0.85rem;">If you didn't request this, you can safely ignore this email.</p>
       </div>
     `,
-  };
+  });
 
-  await transporter.sendMail(mailOptions);
+  if (error) {
+    throw new Error(error.message || "Failed to send email");
+  }
 };

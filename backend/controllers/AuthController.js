@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import speakeasy from "speakeasy";
 import QRCode from "qrcode";
+import { sendOTPEmail } from "../utils/emailService.js";
 
 // ── Email transporter ──
 const transporter = nodemailer.createTransport({
