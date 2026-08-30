@@ -1,5 +1,4 @@
-// API Base URL
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_BASE = "https://ar-heritage-platform.onrender.com";
 
 // Helper: API request with token
 const apiFetch = async (endpoint, options = {}) => {
