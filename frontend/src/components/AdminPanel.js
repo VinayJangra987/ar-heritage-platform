@@ -47,7 +47,7 @@ const typeColors = {
   religious:"#E07B54", natural:"#4A7C59", intangible:"#9B59B6",
 };
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const getMonuments = () => {
   try {
