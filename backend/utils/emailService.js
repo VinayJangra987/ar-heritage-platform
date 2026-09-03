@@ -311,14 +311,15 @@
 //   }
 // };
 
-
 import Mailjet from "node-mailjet";
 
+// Create Mailjet client
 const mailjet = new Mailjet({
   apiKey: process.env.MAILJET_API_KEY,
   apiSecret: process.env.MAILJET_SECRET_KEY,
 });
 
+// ── Send OTP Email ──
 export const sendOTPEmail = async (
   email,
   otp,
@@ -326,7 +327,7 @@ export const sendOTPEmail = async (
   purpose = "verify"
 ) => {
   try {
-    // Environment variable checks
+    // ── Environment variable checks ──
     if (!process.env.MAILJET_API_KEY) {
       throw new Error("MAILJET_API_KEY is missing");
     }
@@ -341,18 +342,22 @@ export const sendOTPEmail = async (
 
     console.log("📧 Sending OTP via Mailjet API...");
     console.log("📨 Recipient:", email);
+    console.log("🎯 Purpose:", purpose);
 
+    // ── Email subject ──
     const subject =
       purpose === "reset"
         ? "Password Reset OTP - Bharatiya Dharohar"
         : "Your OTP - Bharatiya Dharohar";
 
+    // ── Email intro ──
     const introLine =
       purpose === "reset"
         ? "Use the following OTP to reset your password:"
         : "Use the following OTP to verify your email:";
 
-    const request = mailjet
+    // ── Send Email ──
+    const request = await mailjet
       .post("send", { version: "v3.1" })
       .request({
         Messages: [
@@ -391,11 +396,14 @@ If you did not request this, you can safely ignore this email.`,
                 color: #F2E8D0;
                 border-radius: 12px;
               ">
+                
                 <h2 style="color: #C9A84C;">
                   🏛 Bharatiya Dharohar
                 </h2>
 
-                <p>Hello <strong>${name || "User"}</strong>,</p>
+                <p>
+                  Hello <strong>${name || "User"}</strong>,
+                </p>
 
                 <p>${introLine}</p>
 
@@ -413,7 +421,9 @@ If you did not request this, you can safely ignore this email.`,
                   ${otp}
                 </div>
 
-                <p>This OTP expires in 10 minutes.</p>
+                <p>
+                  This OTP expires in 10 minutes.
+                </p>
 
                 <p style="
                   color: #aaa;
@@ -421,33 +431,45 @@ If you did not request this, you can safely ignore this email.`,
                 ">
                   If you did not request this, you can safely ignore this email.
                 </p>
+
               </div>
             `,
           },
         ],
       });
 
-    console.log("📬 MAILJET RESPONSE:", request.body);
+    // ── Log Mailjet response ──
+    console.log(
+      "📬 MAILJET RESPONSE:",
+      JSON.stringify(request.body, null, 2)
+    );
 
-    // Mailjet response validation
-    const message = request.body.Messages?.[0];
+    // ── Validate response ──
+    const message = request.body?.Messages?.[0];
 
-    if (!message || message.Status !== "success") {
+    if (!message) {
+      throw new Error("Invalid response received from Mailjet");
+    }
+
+    if (message.Status !== "success") {
       throw new Error(
-        message?.Errors?.[0]?.ErrorMessage ||
+        message.Errors?.[0]?.ErrorMessage ||
         "Mailjet failed to send email"
       );
     }
 
     console.log("✅ OTP EMAIL SENT SUCCESSFULLY");
+    console.log("📧 Message ID:", message.To?.[0]?.MessageID);
 
     return request.body;
 
   } catch (error) {
     console.error("❌ MAILJET EMAIL ERROR:");
 
+    // Better error logging
     console.error(
       error.response?.data ||
+      error.response?.body ||
       error.body ||
       error.message ||
       error
