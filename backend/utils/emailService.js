@@ -37,10 +37,115 @@
 //   }
 // };
 
-import { Resend } from "resend";
+// import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// const resend = new Resend(process.env.RESEND_API_KEY);
 
+// export const sendOTPEmail = async (
+//   email,
+//   otp,
+//   name,
+//   purpose = "verify"
+// ) => {
+//   try {
+//     if (!process.env.RESEND_API_KEY) {
+//       throw new Error("RESEND_API_KEY is missing in .env");
+//     }
+
+//     console.log("📧 Sending OTP email...");
+//     console.log("📨 Recipient:", email);
+//     console.log("🎯 Purpose:", purpose);
+
+//     const subject =
+//       purpose === "reset"
+//         ? "Password Reset OTP - Bharatiya Dharohar"
+//         : "Your OTP - Bharatiya Dharohar";
+
+//     const introLine =
+//       purpose === "reset"
+//         ? "Use the following OTP to reset your password:"
+//         : "Use the following OTP to verify your email:";
+
+//     const result = await resend.emails.send({
+//       from: "Bharatiya Dharohar <onboarding@resend.dev>",
+//       to: [email],
+//       subject,
+//       html: `
+//         <div style="
+//           font-family: Arial, sans-serif;
+//           max-width: 480px;
+//           margin: auto;
+//           padding: 30px;
+//           background: #0D1B2A;
+//           color: #F2E8D0;
+//           border-radius: 12px;
+//         ">
+//           <h2 style="color: #C9A84C;">
+//             Bharatiya Dharohar
+//           </h2>
+
+//           <p>Hello <strong>${name || "User"}</strong>,</p>
+
+//           <p>${introLine}</p>
+
+//           <div style="
+//             font-size: 32px;
+//             font-weight: bold;
+//             letter-spacing: 8px;
+//             color: #C9A84C;
+//             text-align: center;
+//             padding: 20px;
+//             margin: 20px 0;
+//             background: rgba(201,168,76,0.1);
+//             border-radius: 8px;
+//           ">
+//             ${otp}
+//           </div>
+
+//           <p>This OTP expires in 10 minutes.</p>
+
+//           <p style="color: #aaa; font-size: 13px;">
+//             If you did not request this, you can safely ignore this email.
+//           </p>
+//         </div>
+//       `,
+//     });
+
+//     console.log("📬 RESEND FULL RESPONSE:", result);
+
+//     if (result.error) {
+//       console.error("❌ RESEND API ERROR:", result.error);
+
+//       throw new Error(
+//         result.error.message || "Resend failed to send email"
+//       );
+//     }
+
+//     console.log("✅ Email sent successfully");
+
+//     return result;
+
+//   } catch (error) {
+//     console.error("❌ RESEND EMAIL ERROR:");
+//     console.error(error);
+
+//     throw error;
+//   }
+// };
+
+
+import nodemailer from "nodemailer";
+
+// ── Gmail SMTP transporter ──
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,          // your gmail address
+    pass: process.env.GMAIL_APP_PASSWORD,  // 16-digit App Password
+  },
+});
+
+// ── Send OTP Email (generic, used for signup + password reset) ──
 export const sendOTPEmail = async (
   email,
   otp,
@@ -48,8 +153,8 @@ export const sendOTPEmail = async (
   purpose = "verify"
 ) => {
   try {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is missing in .env");
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      throw new Error("GMAIL_USER or GMAIL_APP_PASSWORD is missing in .env");
     }
 
     console.log("📧 Sending OTP email...");
@@ -66,9 +171,9 @@ export const sendOTPEmail = async (
         ? "Use the following OTP to reset your password:"
         : "Use the following OTP to verify your email:";
 
-    const result = await resend.emails.send({
-      from: "Bharatiya Dharohar <onboarding@resend.dev>",
-      to: [email],
+    const result = await transporter.sendMail({
+      from: `"Bharatiya Dharohar" <${process.env.GMAIL_USER}>`,
+      to: email,
       subject,
       html: `
         <div style="
@@ -111,22 +216,13 @@ export const sendOTPEmail = async (
       `,
     });
 
-    console.log("📬 RESEND FULL RESPONSE:", result);
-
-    if (result.error) {
-      console.error("❌ RESEND API ERROR:", result.error);
-
-      throw new Error(
-        result.error.message || "Resend failed to send email"
-      );
-    }
-
+    console.log("📬 GMAIL SMTP RESPONSE:", result);
     console.log("✅ Email sent successfully");
 
     return result;
 
   } catch (error) {
-    console.error("❌ RESEND EMAIL ERROR:");
+    console.error("❌ EMAIL SEND ERROR:");
     console.error(error);
 
     throw error;
