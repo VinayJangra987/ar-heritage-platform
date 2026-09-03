@@ -470,26 +470,87 @@ export const changePassword = async (req, res) => {
 // ════════════════════════════════════════════════
 // FORGOT PASSWORD — Step 1: send OTP
 // ════════════════════════════════════════════════
+// export const forgotPassword = async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     const user = await User.findOne({ email });
+
+//     if (!user)
+//       return res.status(404).json({ success: false, message: "User not found." });
+
+//     const otp = generateOTP();
+//     user.resetOtp = otp;
+//     user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+//     await user.save({ validateBeforeSave: false });
+
+//     await sendOTPEmail(email, otp, user.name, "reset");
+
+//     res.status(200).json({ success: true, message: "OTP has been sent to your email." });
+//   } catch (err) {
+//     console.error("❌ Forgot password error:", err);
+//     res.status(500).json({ success: false, message: "Failed to send reset OTP", error: err.message });
+//   }
+// };
+
+
 export const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+try {
+const email = req.body.email?.trim().toLowerCase();
+if (!email) {
+  return res.status(400).json({
+    success: false,
+    message: "Email is required."
+  });
+}
 
-    if (!user)
-      return res.status(404).json({ success: false, message: "User not found." });
+console.log("Forgot password request email:", email);
 
-    const otp = generateOTP();
-    user.resetOtp = otp;
-    user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
-    await user.save({ validateBeforeSave: false });
-
-    await sendOTPEmail(email, otp, user.name, "reset");
-
-    res.status(200).json({ success: true, message: "OTP has been sent to your email." });
-  } catch (err) {
-    console.error("❌ Forgot password error:", err);
-    res.status(500).json({ success: false, message: "Failed to send reset OTP", error: err.message });
+const user = await User.findOne({
+  email: {
+    $regex: new RegExp(`^${email}$`, "i")
   }
+});
+
+if (!user) {
+  console.log("User not found for email:", email);
+
+  return res.status(404).json({
+    success: false,
+    message: "User not found."
+  });
+}
+
+const otp = generateOTP();
+
+user.resetOtp = otp;
+user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+await user.save({ validateBeforeSave: false });
+
+console.log("OTP generated for:", user.email);
+
+await sendOTPEmail(
+  user.email,
+  otp,
+  user.name,
+  "reset"
+);
+
+res.status(200).json({
+  success: true,
+  message: "OTP has been sent to your email."
+});
+} catch (err) {
+console.error("Forgot password error:", err);
+
+
+res.status(500).json({
+  success: false,
+  message: "Failed to send reset OTP",
+  error: err.message
+});
+
+}
 };
 
 // ════════════════════════════════════════════════
