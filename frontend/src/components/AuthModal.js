@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -68,7 +67,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
   // ── 2FA verify (login ko dobara call karo, ab code ke saath) ──
   const handleVerify2FA = async () => {
     if (twoFACode.length !== 6) {
-      setError("6-digit code daalo.");
+      setError("Please enter a 6-digit code.");
       return;
     }
     setError("");
@@ -79,7 +78,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
       if (result?.success) {
         onClose();
       } else {
-        setError(result?.message || "Galat code.");
+        setError(result?.message || "Invalid code.");
       }
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -91,7 +90,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
   // ── OTP verify ──
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
-      setError("6-digit OTP daalo.");
+      setError("Please enter a 6-digit OTP.");
       return;
     }
     setError("");
@@ -102,7 +101,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
       if (result?.success) {
         onClose();
       } else {
-        setError(result?.message || "Galat OTP.");
+        setError(result?.message || "Invalid OTP.");
       }
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -118,7 +117,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
     setResendLoading(true);
     try {
       const data = await resendOTP(pendingEmail);
-      setResendMsg(data?.message || "OTP bheja gaya.");
+      setResendMsg(data?.message || "OTP has been sent.");
     } catch {
       setError("Resend failed.");
     }
@@ -130,9 +129,9 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
     return (
       <div style={overlayStyle}>
         <div style={cardStyle}>
-          <h2 style={titleStyle}>2FA Code Daalo</h2>
+          <h2 style={titleStyle}>Enter 2FA Code</h2>
           <p style={{ color: "rgba(242,232,208,0.6)", fontSize: "0.82rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
-            Apne authenticator app se 6-digit code enter karein.
+            Enter the 6-digit code from your authenticator app.
           </p>
 
           <input
@@ -153,7 +152,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
             onClick={() => { setStep("form"); setTwoFACode(""); setError(""); }}
             style={{ color: "rgba(242,232,208,0.4)", fontSize: "0.72rem", textAlign: "center", marginTop: "1rem", cursor: "pointer" }}
           >
-            ← Wapas jao
+            ← Go back
           </p>
 
           <button onClick={onClose} style={closeBtn}>✕</button>
@@ -167,9 +166,9 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
     return (
       <div style={overlayStyle}>
         <div style={cardStyle}>
-          <h2 style={titleStyle}>Email Verify Karo</h2>
+          <h2 style={titleStyle}>Verify The Email</h2>
           <p style={{ color: "rgba(242,232,208,0.6)", fontSize: "0.82rem", marginBottom: "1.5rem", lineHeight: 1.6 }}>
-            <span style={{ color: "#C9A84C" }}>{pendingEmail}</span> pe 6-digit OTP bheja gaya hai.
+            <span style={{ color: "#C9A84C" }}>{pendingEmail}</span> The 6-digit OTP is send to your Email.
           </p>
 
           <input
@@ -188,12 +187,12 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
           </button>
 
           <p style={{ color: "rgba(242,232,208,0.5)", fontSize: "0.75rem", textAlign: "center", marginTop: "1rem" }}>
-            OTP nahi mila?{" "}
+            Didn't receive the OTP?{" "}
             <span
               onClick={resendLoading ? undefined : handleResend}
               style={{ color: "#C9A84C", cursor: resendLoading ? "default" : "pointer", opacity: resendLoading ? 0.5 : 1 }}
             >
-              {resendLoading ? "Bhej raha hoon..." : "Resend karo"}
+              {resendLoading ? "Sending..." : "Resend"}
             </span>
           </p>
 
@@ -201,7 +200,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
             onClick={() => { setStep("form"); setOtp(""); setError(""); setResendMsg(""); }}
             style={{ color: "rgba(242,232,208,0.4)", fontSize: "0.72rem", textAlign: "center", marginTop: "0.5rem", cursor: "pointer" }}
           >
-            ← Wapas jao
+            ← Go back
           </p>
 
           <button onClick={onClose} style={closeBtn}>✕</button>
@@ -259,7 +258,7 @@ export default function AuthModal({ onClose, onForgotPassword, initialMode = "lo
             onClick={onForgotPassword}
             style={{ color: "rgba(242,232,208,0.45)", fontSize: "0.72rem", textAlign: "center", marginTop: "0.85rem", cursor: "pointer" }}
           >
-            Password bhool gaye? <span style={{ color: "#C9A84C" }}>Reset karo</span>
+            Forgot your password? <span style={{ color: "#C9A84C" }}>Reset Password</span>
           </p>
         )}
 

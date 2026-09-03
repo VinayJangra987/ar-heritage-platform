@@ -3032,22 +3032,10 @@ function AppInner() {
   // LOGIN REQUIRED
   // ----------------------------------------------------------
 
-  const openAR = () => {
+ const openAR = () => {
 
-    if (!user) {
-
-      setAuthMode("login");
-
-      setShowAuth(true);
-
-      return;
-    }
-
-
-    setShowAR(true);
-
-  };
-
+  setShowAR(true);
+};
 
   // ----------------------------------------------------------
   // ADMIN
@@ -3196,14 +3184,6 @@ function AppInner() {
             setShowAuth(true);
 
           }}
-
-
-          onSelectGuest={() => {
-
-            setShowAuthChoice(false);
-
-          }}
-
         />
 
       )}
@@ -3862,20 +3842,19 @@ function AppInner() {
             AR VIEW
         =================================================== */}
 
-        {showAR && user && (
+        {showAR && (
 
-          <ARView
+        <ARView
 
-            onClose={() =>
-              setShowAR(false)
-            }
+          onClose={() =>
+            setShowAR(false)
+          }
 
-            initialSite={selectedSite}
+          initialSite={selectedSite}
 
-          />
+        />
 
-        )}
-
+      )}
 
         {/* ===================================================
             NEARBY

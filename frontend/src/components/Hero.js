@@ -268,16 +268,11 @@ export default function Hero({ onExplore, onShowAuth }) {
 
       {/* ── AR View (actual 3D viewer) ── */}
       {/* 🔒 Logged-in users only — same auth wall pattern as FavoritesSection */}
-      {showARView && (
-        <RequireAuth
-          onShowAuth={onShowAuth}
-          mode="overlay"
-          title="Sign in to view in AR"
-          message="Create a free account to place heritage monuments in your own space with AR."
-        >
-          <ARView initialSite={arSite} onClose={() => setShowARView(false)} />
-        </RequireAuth>
-      )}
+     {showARView && (
+  <RequireAuth publicAccess={true}>
+    <ARView initialSite={arSite} onClose={() => setShowARView(false)} />
+  </RequireAuth>
+)}
     </>
   );
 }

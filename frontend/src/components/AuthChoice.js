@@ -20,10 +20,6 @@ const AuthChoice = ({ onSelectLogin, onSelectSignup, onSelectAdmin, onSelectGues
           <button className="auth-choice-btn admin-btn" onClick={onSelectAdmin}>
             🛡️ Admin Login
           </button>
-
-          <button className="auth-choice-btn guest-btn" onClick={onSelectGuest}>
-            👤 Continue as Guest
-          </button>
         </div>
       </div>
     </div>
