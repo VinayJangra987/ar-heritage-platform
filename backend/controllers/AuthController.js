@@ -1536,182 +1536,129 @@ export const changePassword = async (
 };
 
 // ════════════════════════════════════════════════
-// FORGOT PASSWORD
-// STEP 1 — SEND OTP
+// FORGOT PASSWORD — Step 1: Send OTP
 // ════════════════════════════════════════════════
-export const forgotPassword = async (
-  req,
-  res
-) => {
+export const forgotPassword = async (req, res) => {
   try {
-    const email =
-      req.body.email
-        ?.trim()
-        .toLowerCase();
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+
+    console.log("🔐 FORGOT PASSWORD REQUEST");
+    console.log("📧 Email:", email);
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        message:
-          "Email is required.",
+        message: "Email is required.",
       });
     }
 
-    console.log(
-      "Forgot password request email:",
-      email
-    );
-
-    const user =
-      await User.findOne({
-        email: {
-          $regex: new RegExp(
-            `^${email}$`,
-            "i"
-          ),
-        },
-      });
+    const user = await User.findOne({
+      email,
+    }).select("+resetOtp +resetOtpExpiry");
 
     if (!user) {
-      console.log(
-        "User not found for email:",
-        email
-      );
-
       return res.status(404).json({
         success: false,
-        message:
-          "User not found.",
+        message: "User not found.",
       });
     }
 
-    const otp =
-      generateOTP().toString();
+    // OTP ONLY GENERATED ONCE
+    const otp = String(generateOTP()).trim();
 
+    console.log("🎲 GENERATED OTP:", otp);
+
+    // Save EXACT SAME OTP
     user.resetOtp = otp;
 
-    user.resetOtpExpiry =
-      new Date(
-        Date.now() +
-        10 * 60 * 1000
-      );
+    user.resetOtpExpiry = new Date(
+      Date.now() + 10 * 60 * 1000
+    );
 
     await user.save({
       validateBeforeSave: false,
     });
 
     console.log(
-      "OTP generated for:",
-      user.email
+      "💾 SAVED OTP:",
+      String(user.resetOtp).trim()
     );
 
+    // Send EXACT SAME OTP
     await sendOTPEmail(
       user.email,
       otp,
-      user.name,
+      user.name || "User",
       "reset"
     );
 
+    console.log("📨 SENT OTP:", otp);
+
     return res.status(200).json({
       success: true,
-      message:
-        "OTP has been sent to your email.",
+      message: "OTP has been sent to your email.",
     });
 
   } catch (err) {
-    console.error(
-      "❌ Forgot password error:",
-      err
-    );
+    console.error("❌ FORGOT PASSWORD ERROR:", err);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to send reset OTP",
-      error:
-        err.message,
+      message: "Failed to send reset OTP",
+      error: err.message,
     });
   }
 };
 
+
 // ════════════════════════════════════════════════
-// VERIFY RESET OTP
-// STEP 2
+// VERIFY RESET OTP — Step 2
 // ════════════════════════════════════════════════
-export const verifyResetOtp = async (
-  req,
-  res
-) => {
+export const verifyResetOtp = async (req, res) => {
   try {
-    const email =
-      req.body.email
-        ?.trim()
-        .toLowerCase();
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
 
-    const receivedOTP =
-      req.body.otp
-        ?.toString()
-        .trim();
+    const receivedOtp = String(
+      req.body.otp || ""
+    ).trim();
 
-    if (!email || !receivedOTP) {
+    console.log("🔍 VERIFYING RESET OTP");
+    console.log("📧 Email:", email);
+    console.log("📥 RECEIVED OTP:", receivedOtp);
+
+    if (!email || !receivedOtp) {
       return res.status(400).json({
         success: false,
-        message:
-          "Email and OTP are required.",
+        message: "Email and OTP are required.",
       });
     }
 
-    console.log(
-      "\n🔍 VERIFYING RESET OTP"
-    );
-
-    console.log(
-      "Email:",
-      email
-    );
-
-    console.log(
-      "Received OTP:",
-      receivedOTP
-    );
-
-    const user =
-      await User.findOne({
-        email: {
-          $regex: new RegExp(
-            `^${email}$`,
-            "i"
-          ),
-        },
-      }).select(
-        "+resetOtp +resetOtpExpiry"
-      );
+    const user = await User.findOne({
+      email,
+    }).select("+resetOtp +resetOtpExpiry");
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message:
-          "User not found.",
+        message: "User not found.",
       });
     }
 
-    const storedOTP =
-      user.resetOtp
-        ?.toString()
-        .trim();
+    const storedOtp = user.resetOtp
+      ? String(user.resetOtp).trim()
+      : "";
 
+    console.log("💾 STORED OTP:", storedOtp);
     console.log(
-      "Stored OTP:",
-      storedOTP
+      "🔄 OTP MATCH:",
+      receivedOtp === storedOtp
     );
 
-    console.log(
-      "OTP Match:",
-      storedOTP === receivedOTP
-    );
-
-    // Check OTP exists
-    if (!storedOTP) {
+    if (!storedOtp) {
       return res.status(400).json({
         success: false,
         message:
@@ -1719,25 +1666,19 @@ export const verifyResetOtp = async (
       });
     }
 
-    // Check OTP matches
-    if (
-      storedOTP !==
-      receivedOTP
-    ) {
+    // Compare OTP
+    if (receivedOtp !== storedOtp) {
       return res.status(400).json({
         success: false,
-        message:
-          "Incorrect OTP.",
+        message: "Incorrect OTP.",
       });
     }
 
     // Check expiry
     if (
       !user.resetOtpExpiry ||
-      new Date() >
-      new Date(
-        user.resetOtpExpiry
-      )
+      Date.now() >
+        new Date(user.resetOtpExpiry).getTime()
     ) {
       return res.status(400).json({
         success: false,
@@ -1746,63 +1687,47 @@ export const verifyResetOtp = async (
       });
     }
 
-    // IMPORTANT:
-    // Create reset token before responding
-    const resetToken =
-      jwt.sign(
-        {
-          id:
-            user._id.toString(),
+    console.log("✅ OTP VERIFIED SUCCESSFULLY");
 
-          purpose:
-            "password_reset",
-        },
-
-        process.env.JWT_SECRET,
-
-        {
-          expiresIn: "10m",
-        }
-      );
-
-    // Clear OTP after successful verification
-    user.resetOtp =
-      undefined;
-
-    user.resetOtpExpiry =
-      undefined;
+    // Clear OTP
+    user.resetOtp = undefined;
+    user.resetOtpExpiry = undefined;
 
     await user.save({
       validateBeforeSave: false,
     });
 
-    console.log(
-      "✅ RESET OTP VERIFIED"
+    // Create reset token
+    const resetToken = jwt.sign(
+      {
+        id: user._id,
+        purpose: "password_reset",
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "10m",
+      }
     );
 
     return res.status(200).json({
       success: true,
-      message:
-        "OTP verified successfully.",
       resetToken,
+      message: "OTP verified.",
     });
 
   } catch (err) {
     console.error(
-      "❌ Verify reset OTP error:",
+      "❌ VERIFY RESET OTP ERROR:",
       err
     );
 
     return res.status(500).json({
       success: false,
-      message:
-        "Error verifying OTP.",
-      error:
-        err.message,
+      message: "Error verifying OTP.",
+      error: err.message,
     });
   }
 };
-
 // ════════════════════════════════════════════════
 // RESET PASSWORD
 // STEP 3
