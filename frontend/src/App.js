@@ -2000,7 +2000,7 @@ import MapView from "./components/MapView";
 import AuthModal from "./components/AuthModal";
 import AuthChoice from "./components/AuthChoice";
 import UserMenu from "./components/UserMenu";
-import LandingPage from "./pages/LandingPage";
+import LandingPage from "./components/LandingPage";
 
 import ARView from "./components/ARView";
 import FavoritesSection from "./components/FavoritesSection";
@@ -3150,16 +3150,33 @@ function AppInner() {
 
 
        {showLanding && !user && (
+      // <LandingPage
+      //   onGetStarted={() => {
+      //     setShowLanding(false);
+      //     setAuthMode("login");
+      //     setShowAuth(true);
+      //   }}
+      //   onExplore={() => {
+      //     setShowLanding(false);
+      //   }}
+      // />
+
       <LandingPage
-        onGetStarted={() => {
-          setShowLanding(false);
+          onLogin={() => {
+          // setShowLanding(false);
           setAuthMode("login");
           setShowAuth(true);
-        }}
-        onExplore={() => {
+          }}
+          onSignup={() => {
+          // setShowLanding(false);
+          setAuthMode("signup");
+          setShowAuth(true);
+          }}
+          onExplore={() => {
           setShowLanding(false);
-        }}
-      />
+          }}
+          />
+
     )}
 
 
@@ -3271,7 +3288,7 @@ function AppInner() {
         {/* ===================================================
             NAVBAR
         =================================================== */}
-
+{/* 
         <Navbar
 
           onSearchOpen={() =>
@@ -3306,8 +3323,49 @@ function AppInner() {
 
           }
 
-        />
+        /> */}
 
+
+
+        <Navbar
+
+          onSearchOpen={() =>
+            setSearchOpen(true)
+          }
+
+          onExploreClick={() => {
+            handleTabSwitch("discover");
+          }}
+
+          onMapClick={() =>
+            handleTabSwitch("map")
+          }
+
+          onFavClick={() =>
+            handleTabSwitch("favourites")
+          }
+
+          onARClick={openAR}
+
+          onAuthChoiceClick={() =>
+            setShowAuthChoice(true)
+          }
+
+          extraRight={
+
+            <UserMenu
+
+              onShowAuth={() =>
+                setShowAuth(true)
+              }
+
+              onShowAdmin={openAdmin}
+
+            />
+
+          }
+
+        />
 
         {/* ===================================================
             HERO
@@ -3318,7 +3376,6 @@ function AppInner() {
           onExplore={() => {
 
             setActiveView("discover");
-
             // PUBLIC DISCOVERY TOUR
             setShowDiscoveryTour(true);
 

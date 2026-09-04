@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ARView from "./ARView";
 import DiscoveryTour, { SITES } from "./DiscoveryTour";
-import HeritageScrollMorph from "./HeritageScrollMorph";
+// import HeritageScrollMorph from "./HeritageScrollMorph";
 import RequireAuth from "./RequireAuth";
 
 // ─── Hero Slides ────────────────────────────────────────────────────────────
@@ -252,7 +252,7 @@ export default function Hero({ onExplore, onShowAuth }) {
       </section>
 
       {/* ── Scroll-driven morph sequence (landing page) — morphs through all 4 sites in one continuous scroll ── */}
-      <HeritageScrollMorph sites={SITES} onViewAR={handleOpenAR} />
+      {/* <HeritageScrollMorph sites={SITES} onViewAR={handleOpenAR} /> */}
 
       {/* ── Category Section ── */}
       <CategorySection onSelect={handleCategorySelect} activeCategory={activeCategory} />

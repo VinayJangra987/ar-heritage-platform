@@ -973,15 +973,15 @@ export const login = async (req, res) => {
       });
     }
 
-    if (!user.isEmailVerified) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Email is not verified. Please verify with OTP first.",
-        requiresOTP: true,
-        email: normalizedEmail,
-      });
-    }
+    // if (!user.isEmailVerified) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message:
+    //       "Email is not verified. Please verify with OTP first.",
+    //     requiresOTP: true,
+    //     email: normalizedEmail,
+    //   });
+    // }
 
     if (user.twoFactorEnabled) {
       if (!twoFactorCode) {
