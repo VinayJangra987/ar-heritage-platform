@@ -127,18 +127,9 @@ const UserMenu = ({ onShowAuth, onShowFavorites, onShowAdmin }) => {
         >
           <div className="um-avatar">{initials}</div>
 
-          <span className="um-name">
+                    <span className="um-name">
             {user.name.split(' ')[0]}
           </span>
-
-          {streakCurrent > 0 && (
-            <span
-              className="um-streak-pill"
-              title={`${streakCurrent}-day streak`}
-            >
-              🔥 {streakCurrent}
-            </span>
-          )}
 
           <span className="um-chevron">
             {open ? '▲' : '▼'}

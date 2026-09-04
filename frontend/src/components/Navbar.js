@@ -185,7 +185,6 @@
 // export default Navbar;
 
 
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
@@ -201,7 +200,7 @@ const Navbar = ({
   extraRight,
   onAuthChoiceClick
 }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -255,7 +254,7 @@ const Navbar = ({
               Map
             </button>
 
-            {!user && (
+            {!loading && !user && (
           <button
             className="nav-link"
             onClick={onAboutClick}
@@ -264,7 +263,7 @@ const Navbar = ({
           </button>
               )}
 
-            {user && (
+            {!loading && user && (
               <>
                 <button
                   className="nav-link nav-fav-link"
@@ -305,7 +304,7 @@ const Navbar = ({
               🔍
             </button>
 
-            {user && (
+            {!loading && user && (
               <button
                 className="navbar-fav-btn"
                 onClick={onFavClick}
@@ -339,7 +338,19 @@ const Navbar = ({
               </button>
             )}
 
-            {user ? (
+            {/* Auth-dependent UI — wait for loading to resolve before deciding login vs sign-in */}
+            {loading ? (
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: 'rgba(201,168,76,0.08)',
+                  border: '1px solid rgba(201,168,76,0.15)',
+                }}
+                aria-label="Loading"
+              />
+            ) : user ? (
               extraRight && (
                 <div className="navbar-auth-slot">
                   {extraRight}
@@ -401,7 +412,7 @@ const Navbar = ({
               🗺 Map View
             </button>
 
-         {!user && (
+         {!loading && !user && (
             <button
               className="mobile-nav-link"
               onClick={() => {
@@ -413,7 +424,7 @@ const Navbar = ({
             </button>
           )}
 
-            {user && (
+            {!loading && user && (
               <>
                 <button
                   className="mobile-nav-link"
@@ -447,27 +458,29 @@ const Navbar = ({
               🔍 Search
             </button>
 
-            {user ? (
-              extraRight && (
-                <div className="mobile-auth-slot">
-                  {extraRight}
-                </div>
-              )
-            ) : (
-              onAuthChoiceClick && (
-                <button
-                  className="mobile-nav-link"
-                  onClick={() => {
-                    onAuthChoiceClick();
-                    setMenuOpen(false);
-                  }}
-                >
-                  🔑 Sign In Options
-                </button>
+            {!loading && (
+              user ? (
+                extraRight && (
+                  <div className="mobile-auth-slot">
+                    {extraRight}
+                  </div>
+                )
+              ) : (
+                onAuthChoiceClick && (
+                  <button
+                    className="mobile-nav-link"
+                    onClick={() => {
+                      onAuthChoiceClick();
+                      setMenuOpen(false);
+                    }}
+                  >
+                    🔑 Sign In Options
+                  </button>
+                )
               )
             )}
 
-            {isAdmin && (
+            {!loading && isAdmin && (
               <button
                 className="mobile-nav-link"
                 onClick={() => {
