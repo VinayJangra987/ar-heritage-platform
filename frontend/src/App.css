@@ -1,5 +1,9 @@
 /* src/App.css */
 /* AR Heritage Platform — Global Styles */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Mono:wght@400;700&family=Poppins:wght@300;400;500&display=swap');
 

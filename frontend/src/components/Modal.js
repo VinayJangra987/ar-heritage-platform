@@ -1035,6 +1035,15 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
           .modal-tabs { margin:0 1.25rem; }
           .modal-fav-btn[style] { display:none; }
         }
+
+        .modal-panel {
+        background: #0F1E2F;
+        border: 1px solid rgba(201,168,76,0.2);
+        border-radius: 24px;
+        max-width: min(900px, calc(100vw - 3rem));  
+        width: 100%;
+        max-height: 90vh; overflow-y: auto;
+        ...
       `}</style>
 
       <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
