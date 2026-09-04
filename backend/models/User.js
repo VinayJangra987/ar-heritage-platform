@@ -118,6 +118,11 @@ const userSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
+    badges: [{
+  id: String,        // "unesco-hunter", "first-review", "ar-explorer"
+  earnedAt: Date
+  }],
+  streak: { current: Number, longest: Number, lastVisitDate: Date },
   },
   { timestamps: true }
 );

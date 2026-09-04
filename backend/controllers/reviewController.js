@@ -269,6 +269,7 @@
 //   likeReview,
 // };
 
+import { awardBadges } from "../utils/gamification.js";
 import Review from "../models/Review.js";
 import Heritage from "../models/Heritage.js";
 import cloudinary from "../config/cloudinary.js";
@@ -329,6 +330,7 @@ export const addReview = async (req, res) => {
       success: true,
       message: "Review added successfully",
       review,
+      newBadges,
     });
   } catch (error) {
     console.error("❌ Add review error:", error);

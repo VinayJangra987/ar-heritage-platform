@@ -47,6 +47,7 @@
 
 import User from "../models/User.js";
 import Heritage from "../models/Heritage.js";
+import { awardBadges } from "../utils/gamification.js";
 
 // ============ GET ALL FAVORITES ============
 export const getFavorites = async (req, res) => {
@@ -83,12 +84,17 @@ export const toggleFavorite = async (req, res) => {
       user.favorites.push(siteId);
     }
 
+
+    const newBadges = awardBadges(user); 
+
     await user.save();
 
     res.status(200).json({
       success: true,
       isFavorite: !isFav,
       favorites: user.favorites,
+      newBadges,    
+      badges: user.badges,
       message: isFav ? "Removed from favorites" : "Added to favorites",
     });
   } catch (error) {

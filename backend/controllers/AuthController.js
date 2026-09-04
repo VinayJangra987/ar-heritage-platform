@@ -654,6 +654,7 @@ import bcrypt from "bcryptjs";
 import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 import { sendOTPEmail } from "../utils/emailService.js";
+import { updateStreak, awardBadges } from "../utils/gamification.js";
 
 // ── Token generators ──
 const generateAccessToken = (userId) =>
@@ -1013,6 +1014,12 @@ export const login = async (req, res) => {
 
     user.lastLogin = new Date();
 
+// 🏅 Gamification — streak + badges
+    updateStreak(user);
+    const newBadges = awardBadges(user);
+
+    
+
     await user.save({
       validateBeforeSave: false,
     });
@@ -1029,6 +1036,7 @@ export const login = async (req, res) => {
 
       token: accessToken,
       refreshToken,
+      newBadges,
 
       user: {
         id: user._id,
@@ -1040,6 +1048,8 @@ export const login = async (req, res) => {
           user.favorites || [],
         twoFactorEnabled:
           user.twoFactorEnabled,
+         badges: user.badges || [], 
+         streak: user.streak || { current: 0, longest: 0 }, 
       },
     });
 
@@ -1355,6 +1365,8 @@ export const getMe = async (
           user.twoFactorEnabled,
         createdAt:
           user.createdAt,
+          badges: user.badges || [],     
+        streak: user.streak || { current: 0, longest: 0 },
       },
     });
 

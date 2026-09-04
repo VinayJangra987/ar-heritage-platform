@@ -21,41 +21,41 @@ export default function TwoFactorSettings() {
       setSecret(data.secret);
       setStage("qr");
     } else {
-      setError(data?.message || "Setup fail ho gaya.");
+      setError(data?.message || "Setup failed.");
     }
     setLoading(false);
   };
 
   const handleVerify = async () => {
     if (code.length !== 6) {
-      setError("6-digit code daalo.");
+      setError("Enter the 6-digit code.");
       return;
     }
     setError(""); setLoading(true);
     const data = await verify2FA(code);
     if (data?.success) {
-      setMessage("2FA enable ho gaya!");
+      setMessage("2FA enabled successfully!");
       setStage("idle");
       setCode("");
     } else {
-      setError(data?.message || "Galat code.");
+      setError(data?.message || "Incorrect code.");
     }
     setLoading(false);
   };
 
   const handleDisable = async () => {
     if (!password) {
-      setError("Password confirm karein.");
+      setError("Please confirm your password.");
       return;
     }
     setError(""); setLoading(true);
     const data = await disable2FA(password);
     if (data?.success) {
-      setMessage("2FA disable ho gaya.");
+      setMessage("2FA disabled.");
       setStage("idle");
       setPassword("");
     } else {
-      setError(data?.message || "Disable fail ho gaya.");
+      setError(data?.message || "Disable failed.");
     }
     setLoading(false);
   };
@@ -65,8 +65,8 @@ export default function TwoFactorSettings() {
       <h3 style={headingStyle}>Two-Factor Authentication</h3>
       <p style={descStyle}>
         {user?.twoFactorEnabled
-          ? "2FA abhi enabled hai — login pe authenticator code maanga jayega."
-          : "Authenticator app (Google Authenticator, Authy) se extra security add karein."}
+          ? "2FA is currently enabled — you'll be asked for an authenticator code at login."
+          : "Add extra security using an authenticator app (Google Authenticator, Authy)."}
       </p>
 
       {error && <p style={errorStyle}>{error}</p>}
@@ -75,14 +75,14 @@ export default function TwoFactorSettings() {
       {/* ── Already enabled: disable option ── */}
       {user?.twoFactorEnabled && stage === "idle" && (
         <button onClick={() => setStage("disabling")} style={dangerBtnStyle}>
-          2FA DISABLE KARO
+          DISABLE 2FA
         </button>
       )}
 
       {stage === "disabling" && (
         <>
           <input
-            placeholder="Password confirm karein"
+            placeholder="Confirm your password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -91,14 +91,14 @@ export default function TwoFactorSettings() {
           <button onClick={handleDisable} disabled={loading} style={dangerBtnStyle}>
             {loading ? "Please wait..." : "CONFIRM DISABLE"}
           </button>
-          <p onClick={() => setStage("idle")} style={linkStyle}>← Cancel karo</p>
+          <p onClick={() => setStage("idle")} style={linkStyle}>← Cancel</p>
         </>
       )}
 
       {/* ── Not enabled: setup flow ── */}
       {!user?.twoFactorEnabled && stage === "idle" && (
         <button onClick={handleStartSetup} disabled={loading} style={btnStyle(loading)}>
-          {loading ? "Loading..." : "2FA ENABLE KARO"}
+          {loading ? "Loading..." : "ENABLE 2FA"}
         </button>
       )}
 
@@ -118,7 +118,7 @@ export default function TwoFactorSettings() {
           <button onClick={handleVerify} disabled={loading} style={btnStyle(loading)}>
             {loading ? "Verifying..." : "VERIFY & ENABLE"}
           </button>
-          <p onClick={() => setStage("idle")} style={linkStyle}>← Cancel karo</p>
+          <p onClick={() => setStage("idle")} style={linkStyle}>← Cancel</p>
         </div>
       )}
     </div>

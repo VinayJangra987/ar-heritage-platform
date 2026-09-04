@@ -2000,6 +2000,7 @@ import MapView from "./components/MapView";
 import AuthModal from "./components/AuthModal";
 import AuthChoice from "./components/AuthChoice";
 import UserMenu from "./components/UserMenu";
+import LandingPage from "./pages/LandingPage";
 
 import ARView from "./components/ARView";
 import FavoritesSection from "./components/FavoritesSection";
@@ -2642,6 +2643,9 @@ function AppInner() {
   const [showAuthChoice, setShowAuthChoice] =
     useState(false);
 
+  const [showLanding, setShowLanding] =
+  useState(true);
+
   const [authMode, setAuthMode] =
     useState("login");
 
@@ -3143,6 +3147,20 @@ function AppInner() {
       ===================================================== */}
 
       <CustomCursor />
+
+
+       {showLanding && !user && (
+      <LandingPage
+        onGetStarted={() => {
+          setShowLanding(false);
+          setAuthMode("login");
+          setShowAuth(true);
+        }}
+        onExplore={() => {
+          setShowLanding(false);
+        }}
+      />
+    )}
 
 
       {/* =====================================================

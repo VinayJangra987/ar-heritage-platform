@@ -21,6 +21,7 @@ export default function Discovery({ onSiteClick }) {
         const list = data?.sites || [];
         const normalized = list.map((site) => ({
           id:          site._id,
+          _id:         site._id,
           name:        site.name,
           // Backend "Architectural" → lowercase "architectural" for filter match
           type:        (site.type || "architectural").toLowerCase(),

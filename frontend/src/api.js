@@ -1,6 +1,14 @@
+
+// // ============================================================
+// // API BASE URL
+// // ============================================================
+
 // const API_BASE = "https://ar-heritage-platform.onrender.com";
 
-// // Helper: API request with token
+// // ============================================================
+// // HELPER: API REQUEST WITH TOKEN
+// // ============================================================
+
 // const apiFetch = async (endpoint, options = {}) => {
 //   const token = localStorage.getItem("token");
 
@@ -13,33 +21,54 @@
 //     headers["Authorization"] = `Bearer ${token}`;
 //   }
 
-//   const response = await fetch(`${API_BASE}${endpoint}`, {
-//     ...options,
-//     headers,
-//   });
+//   const response = await fetch(
+//     `${API_BASE}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`,
+//     {
+//       ...options,
+//       headers,
+//     }
+//   );
 
-//   const data = await response.json();
+//   let data;
+
+//   try {
+//     data = await response.json();
+//   } catch {
+//     data = {};
+//   }
 
 //   if (!response.ok) {
-//     throw new Error(data.message || `HTTP Error: ${response.status}`);
+//     throw new Error(
+//       data.message || `HTTP Error: ${response.status}`
+//     );
 //   }
 
 //   return data;
 // };
 
-// // ============= AUTH APIs =============
+// // ============================================================
+// // AUTH APIs
+// // ============================================================
+
 // export const authAPI = {
 //   login: async (email, password) => {
 //     return apiFetch("/api/auth/login", {
 //       method: "POST",
-//       body: JSON.stringify({ email, password }),
+//       body: JSON.stringify({
+//         email,
+//         password,
+//       }),
 //     });
 //   },
 
 //   signup: async (name, email, password) => {
 //     return apiFetch("/api/auth/signup", {
 //       method: "POST",
-//       body: JSON.stringify({ name, email, password }),
+//       body: JSON.stringify({
+//         name,
+//         email,
+//         password,
+//       }),
 //     });
 //   },
 
@@ -59,47 +88,66 @@
 //   changePassword: async (currentPassword, newPassword) => {
 //     return apiFetch("/api/auth/change-password", {
 //       method: "POST",
-//       body: JSON.stringify({ currentPassword, newPassword }),
+//       body: JSON.stringify({
+//         currentPassword,
+//         newPassword,
+//       }),
 //     });
 //   },
 
 //   forgotPassword: async (email) => {
 //     return apiFetch("/api/auth/forgot-password", {
 //       method: "POST",
-//       body: JSON.stringify({ email }),
+//       body: JSON.stringify({
+//         email,
+//       }),
 //     });
 //   },
 
 //   verifyResetOtp: async (email, otp) => {
 //     return apiFetch("/api/auth/verify-reset-otp", {
 //       method: "POST",
-//       body: JSON.stringify({ email, otp }),
+//       body: JSON.stringify({
+//         email,
+//         otp,
+//       }),
 //     });
 //   },
 
 //   resetPassword: async (resetToken, newPassword) => {
 //     return apiFetch("/api/auth/reset-password", {
 //       method: "POST",
-//       body: JSON.stringify({ resetToken, newPassword }),
+//       body: JSON.stringify({
+//         resetToken,
+//         newPassword,
+//       }),
 //     });
 //   },
 
 //   verifyOTP: async (email, otp) => {
 //     return apiFetch("/api/auth/verify-otp", {
 //       method: "POST",
-//       body: JSON.stringify({ email, otp }),
+//       body: JSON.stringify({
+//         email,
+//         otp,
+//       }),
 //     });
 //   },
 
 //   resendOTP: async (email) => {
 //     return apiFetch("/api/auth/resend-otp", {
 //       method: "POST",
-//       body: JSON.stringify({ email }),
+//       body: JSON.stringify({
+//         email,
+//       }),
 //     });
 //   },
 // };
 
-// // ============= FAVORITES APIs =============
+// // ============================================================
+// // FAVORITES APIs
+// // ============================================================
+
 // export const favoritesAPI = {
 //   getAll: async () => {
 //     return apiFetch("/api/favorites", {
@@ -110,14 +158,18 @@
 //   toggle: async (siteId) => {
 //     return apiFetch("/api/favorites/toggle", {
 //       method: "POST",
-//       body: JSON.stringify({ siteId }),
+//       body: JSON.stringify({
+//         siteId,
+//       }),
 //     });
 //   },
 
 //   add: async (siteId) => {
 //     return apiFetch("/api/favorites", {
 //       method: "POST",
-//       body: JSON.stringify({ siteId }),
+//       body: JSON.stringify({
+//         siteId,
+//       }),
 //     });
 //   },
 
@@ -128,7 +180,10 @@
 //   },
 // };
 
-// // ============= HERITAGE SITES APIs =============
+// // ============================================================
+// // HERITAGE SITES APIs
+// // ============================================================
+
 // export const heritageAPI = {
 //   getAll: async () => {
 //     return apiFetch("/api/heritage-sites", {
@@ -143,13 +198,17 @@
 //   },
 
 //   search: async (query) => {
-//     return apiFetch(`/api/heritage-sites/search?q=${encodeURIComponent(query)}`, {
-//       method: "GET",
-//     });
+//     return apiFetch(
+//       `/api/heritage-sites/search?q=${encodeURIComponent(query)}`,
+//       {
+//         method: "GET",
+//       }
+//     );
 //   },
 
 //   filter: async (filters) => {
 //     const params = new URLSearchParams(filters).toString();
+
 //     return apiFetch(`/api/heritage-sites/filter?${params}`, {
 //       method: "GET",
 //     });
@@ -176,7 +235,10 @@
 //   },
 // };
 
-// // ============= REVIEWS APIs =============
+// // ============================================================
+// // REVIEWS APIs
+// // ============================================================
+
 // export const reviewsAPI = {
 //   getBySite: async (siteId) => {
 //     return apiFetch(`/api/reviews/site/${siteId}`, {
@@ -187,7 +249,10 @@
 //   create: async (siteId, reviewData) => {
 //     return apiFetch("/api/reviews", {
 //       method: "POST",
-//       body: JSON.stringify({ siteId, ...reviewData }),
+//       body: JSON.stringify({
+//         siteId,
+//         ...reviewData,
+//       }),
 //     });
 //   },
 
@@ -205,7 +270,10 @@
 //   },
 // };
 
-// // ============= TOURS APIs =============
+// // ============================================================
+// // TOURS APIs
+// // ============================================================
+
 // export const toursAPI = {
 //   getAll: async () => {
 //     return apiFetch("/api/tours", {
@@ -242,10 +310,17 @@
 //   book: async (tourId, bookingData) => {
 //     return apiFetch("/api/tours/book", {
 //       method: "POST",
-//       body: JSON.stringify({ tourId, ...bookingData }),
+//       body: JSON.stringify({
+//         tourId,
+//         ...bookingData,
+//       }),
 //     });
 //   },
 // };
+
+// // ============================================================
+// // DEFAULT EXPORT
+// // ============================================================
 
 // const apiExports = {
 //   authAPI,
@@ -254,6 +329,7 @@
 //   reviewsAPI,
 //   toursAPI,
 // };
+
 // export default apiExports;
 
 
@@ -264,7 +340,7 @@
 const API_BASE = "https://ar-heritage-platform.onrender.com";
 
 // ============================================================
-// HELPER: API REQUEST WITH TOKEN
+// HELPER: API REQUEST WITH TOKEN (JSON body)
 // ============================================================
 
 const apiFetch = async (endpoint, options = {}) => {
@@ -284,6 +360,45 @@ const apiFetch = async (endpoint, options = {}) => {
     {
       ...options,
       headers,
+    }
+  );
+
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || `HTTP Error: ${response.status}`
+    );
+  }
+
+  return data;
+};
+
+// ============================================================
+// HELPER: API REQUEST WITH TOKEN (FormData body — for file uploads)
+// Content-Type header NAHI set karte — browser khud boundary ke saath set karega
+// ============================================================
+
+const apiFetchFormData = async (endpoint, formData, method = "POST") => {
+  const token = localStorage.getItem("token");
+
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(
+    `${API_BASE}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`,
+    {
+      method,
+      headers,
+      body: formData,
     }
   );
 
@@ -495,35 +610,43 @@ export const heritageAPI = {
 
 // ============================================================
 // REVIEWS APIs
+// Backend routes: GET /api/reviews/:siteId, POST /api/reviews/:siteId,
+// DELETE /api/reviews/:reviewId, PATCH /api/reviews/:reviewId/like
 // ============================================================
 
 export const reviewsAPI = {
-  getBySite: async (siteId) => {
-    return apiFetch(`/api/reviews/site/${siteId}`, {
+  // Get all reviews for a site
+  getReviews: async (siteId) => {
+    return apiFetch(`/api/reviews/${siteId}`, {
       method: "GET",
     });
   },
 
-  create: async (siteId, reviewData) => {
-    return apiFetch("/api/reviews", {
-      method: "POST",
-      body: JSON.stringify({
-        siteId,
-        ...reviewData,
-      }),
-    });
+  // Add a review — supports optional image files
+  addReview: async (siteId, { rating, title, comment, images, visitedViaAR, visitedViaVirtualTour }) => {
+    const formData = new FormData();
+    formData.append("rating", rating);
+    formData.append("title", title || "");
+    formData.append("comment", comment);
+    if (visitedViaAR !== undefined) formData.append("visitedViaAR", visitedViaAR);
+    if (visitedViaVirtualTour !== undefined) formData.append("visitedViaVirtualTour", visitedViaVirtualTour);
+
+    if (images?.length) {
+      images.forEach((img) => formData.append("images", img));
+    }
+
+    return apiFetchFormData(`/api/reviews/${siteId}`, formData, "POST");
   },
 
-  update: async (reviewId, reviewData) => {
-    return apiFetch(`/api/reviews/${reviewId}`, {
-      method: "PATCH",
-      body: JSON.stringify(reviewData),
-    });
-  },
-
-  delete: async (reviewId) => {
+  deleteReview: async (reviewId) => {
     return apiFetch(`/api/reviews/${reviewId}`, {
       method: "DELETE",
+    });
+  },
+
+  likeReview: async (reviewId) => {
+    return apiFetch(`/api/reviews/${reviewId}/like`, {
+      method: "PATCH",
     });
   },
 };

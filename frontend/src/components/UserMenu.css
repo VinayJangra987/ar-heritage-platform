@@ -164,3 +164,57 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+
+.um-streak-pill {
+  background: rgba(255,107,0,0.12);
+  border: 1px solid rgba(255,107,0,0.3);
+  color: #FF8C42;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 6px;
+}
+
+.um-stats-row {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+}
+
+.um-stat-box {
+  flex: 1;
+  text-align: center;
+  background: rgba(201,168,76,0.06);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 10px;
+  padding: 0.5rem;
+}
+
+.um-stat-num {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #C9A84C;
+}
+
+.um-stat-label {
+  font-size: 0.6rem;
+  color: rgba(242,232,208,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.um-badges-strip {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0 1rem 0.5rem;
+  flex-wrap: wrap;
+}
+
+.um-badge-chip {
+  font-size: 1.1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
