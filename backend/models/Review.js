@@ -1,43 +1,130 @@
-// const mongoose = require("mongoose");
+// // const mongoose = require("mongoose");
+
+// // const reviewSchema = new mongoose.Schema(
+// //   {
+// //     site:    { type: mongoose.Schema.Types.ObjectId, ref: "Heritage", required: true },
+// //     user:    { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+// //     rating:  { type: Number, required: true, min: 1, max: 5 },
+// //     title:   { type: String, trim: true, maxlength: 100 },
+// //     comment: { type: String, trim: true, maxlength: 1000 },
+// //     visitedViaAR:          { type: Boolean, default: false },
+// //     visitedViaVirtualTour: { type: Boolean, default: false },
+// //     likes:    [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+// //     reported: { type: Boolean, default: false },
+// //   },
+// //   { timestamps: true }
+// // );
+
+// // reviewSchema.index({ site: 1, user: 1 }, { unique: true });
+
+// // // Mongoose 7+ mein post("save") mein next nahi hota — async directly use karo
+// // reviewSchema.post("save", async function (doc) {
+// //   try {
+// //     const Heritage = mongoose.model("Heritage");
+// //     const stats = await mongoose.model("Review").aggregate([
+// //       { $match: { site: doc.site } },
+// //       { $group: { _id: "$site", avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+// //     ]);
+// //     if (stats.length > 0) {
+// //       await Heritage.findByIdAndUpdate(doc.site, {
+// //         avgRating:    Math.round(stats[0].avg * 10) / 10,
+// //         totalReviews: stats[0].count,
+// //       });
+// //     }
+// //   } catch (err) {
+// //     console.error("Review post-save error:", err.message);
+// //   }
+// // });
+
+// // module.exports = mongoose.model("Review", reviewSchema);
+
+
+
+
+// import mongoose from "mongoose";
 
 // const reviewSchema = new mongoose.Schema(
 //   {
-//     site:    { type: mongoose.Schema.Types.ObjectId, ref: "Heritage", required: true },
-//     user:    { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-//     rating:  { type: Number, required: true, min: 1, max: 5 },
-//     title:   { type: String, trim: true, maxlength: 100 },
-//     comment: { type: String, trim: true, maxlength: 1000 },
-//     visitedViaAR:          { type: Boolean, default: false },
-//     visitedViaVirtualTour: { type: Boolean, default: false },
-//     likes:    [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-//     reported: { type: Boolean, default: false },
+//     site: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Heritage",
+//       required: true,
+//     },
+//     user: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "User",
+//       required: true,
+//     },
+//     rating: {
+//       type: Number,
+//       required: true,
+//       min: 1,
+//       max: 5,
+//     },
+//     title: {
+//       type: String,
+//       trim: true,
+//       maxlength: 100,
+//     },
+//     comment: {
+//       type: String,
+//       trim: true,
+//       maxlength: 1000,
+//     },
+//     visitedViaAR: {
+//       type: Boolean,
+//       default: false,
+//     },
+//     visitedViaVirtualTour: {
+//       type: Boolean,
+//       default: false,
+//     },
+//     likes: [
+//       {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: "User",
+//       },
+//     ],
+//     reported: {
+//       type: Boolean,
+//       default: false,
+//     },
 //   },
 //   { timestamps: true }
 // );
 
+// // Unique index: one review per user per site
 // reviewSchema.index({ site: 1, user: 1 }, { unique: true });
 
-// // Mongoose 7+ mein post("save") mein next nahi hota — async directly use karo
+// // Post-save hook to update site rating
 // reviewSchema.post("save", async function (doc) {
 //   try {
 //     const Heritage = mongoose.model("Heritage");
-//     const stats = await mongoose.model("Review").aggregate([
+//     const Review = mongoose.model("Review");
+
+//     const stats = await Review.aggregate([
 //       { $match: { site: doc.site } },
-//       { $group: { _id: "$site", avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+//       {
+//         $group: {
+//           _id: "$site",
+//           avg: { $avg: "$rating" },
+//           count: { $sum: 1 },
+//         },
+//       },
 //     ]);
+
 //     if (stats.length > 0) {
 //       await Heritage.findByIdAndUpdate(doc.site, {
-//         avgRating:    Math.round(stats[0].avg * 10) / 10,
+//         avgRating: Math.round(stats[0].avg * 10) / 10,
 //         totalReviews: stats[0].count,
 //       });
 //     }
-//   } catch (err) {
-//     console.error("Review post-save error:", err.message);
+//   } catch (error) {
+//     console.error("Review post-save error:", error.message);
 //   }
 // });
 
-// module.exports = mongoose.model("Review", reviewSchema);
-
+// export default mongoose.model("Review", reviewSchema);
 
 
 
@@ -71,6 +158,12 @@ const reviewSchema = new mongoose.Schema(
       trim: true,
       maxlength: 1000,
     },
+    images: [
+      {
+        url: { type: String, required: true },
+        publicId: { type: String, required: true }, // cloudinary delete ke liye
+      },
+    ],
     visitedViaAR: {
       type: Boolean,
       default: false,
@@ -93,10 +186,8 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Unique index: one review per user per site
 reviewSchema.index({ site: 1, user: 1 }, { unique: true });
 
-// Post-save hook to update site rating
 reviewSchema.post("save", async function (doc) {
   try {
     const Heritage = mongoose.model("Heritage");

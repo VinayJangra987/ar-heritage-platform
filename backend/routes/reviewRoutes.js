@@ -14,22 +14,37 @@
 // module.exports = reviewRouter;
 
 
+// import express from "express";
+// import reviewController from "../controllers/reviewController.js";
+// import { protect } from "../middleware/authMiddleware.js";
+
+// const reviewRouter = express.Router();
+
+// // ============ GET REVIEWS ============
+// reviewRouter.get("/:siteId", reviewController.getReviews);
+
+// // ============ ADD REVIEW ============
+// reviewRouter.post("/:siteId", protect, reviewController.addReview);
+
+// // ============ DELETE REVIEW ============
+// reviewRouter.delete("/:reviewId", protect, reviewController.deleteReview);
+
+// // ============ LIKE REVIEW ============
+// reviewRouter.patch("/:reviewId/like", protect, reviewController.likeReview);
+
+// export default reviewRouter;
+
+
 import express from "express";
 import reviewController from "../controllers/reviewController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import upload from "../middleware/upload.js";
 
 const reviewRouter = express.Router();
 
-// ============ GET REVIEWS ============
 reviewRouter.get("/:siteId", reviewController.getReviews);
-
-// ============ ADD REVIEW ============
-reviewRouter.post("/:siteId", protect, reviewController.addReview);
-
-// ============ DELETE REVIEW ============
+reviewRouter.post("/:siteId", protect, upload.array("images", 5), reviewController.addReview);
 reviewRouter.delete("/:reviewId", protect, reviewController.deleteReview);
-
-// ============ LIKE REVIEW ============
 reviewRouter.patch("/:reviewId/like", protect, reviewController.likeReview);
 
 export default reviewRouter;
