@@ -955,10 +955,10 @@
 //   );
 // }
 
-
 import { useState, useEffect, useCallback } from "react";
 import ScrollStorySection from "./ScrollStorySection";
 import { useAuth } from "../context/AuthContext";
+import ReservationModal from "./ReservationModal";
 
 export const SITES = [
   {
@@ -1043,7 +1043,11 @@ export const SITES = [
   },
 ];
 
-export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
+export default function DiscoveryTour({
+  onClose,
+  onViewAR,
+  onShowAuth,
+}) {
   const { user } = useAuth();
 
   const [current, setCurrent] = useState(0);
@@ -1052,6 +1056,7 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const [inDepthSite, setInDepthSite] = useState(null);
+  const [showReservation, setShowReservation] = useState(false);
 
   const DURATION = 6000;
 
@@ -1076,11 +1081,14 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
   }, [current, goTo]);
 
   const prev = useCallback(() => {
-    goTo((current - 1 + SITES.length) % SITES.length, "prev");
+    goTo(
+      (current - 1 + SITES.length) % SITES.length,
+      "prev"
+    );
   }, [current, goTo]);
 
   useEffect(() => {
-    if (paused || inDepthSite) return;
+    if (paused || inDepthSite || showReservation) return;
 
     const interval = setInterval(() => {
       setProgress((p) => {
@@ -1094,19 +1102,32 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [paused, next, inDepthSite]);
+  }, [
+    paused,
+    next,
+    inDepthSite,
+    showReservation,
+  ]);
 
   useEffect(() => {
     const handler = (e) => {
+      if (showReservation) return;
+
       if (inDepthSite) {
         if (e.key === "Escape") {
           setInDepthSite(null);
         }
+
         return;
       }
 
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") {
+        next();
+      }
+
+      if (e.key === "ArrowLeft") {
+        prev();
+      }
 
       if (e.key === "Escape") {
         onClose();
@@ -1121,23 +1142,30 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
     window.addEventListener("keydown", handler);
 
     return () => {
-      window.removeEventListener("keydown", handler);
+      window.removeEventListener(
+        "keydown",
+        handler
+      );
     };
-  }, [next, prev, onClose, inDepthSite]);
+  }, [
+    next,
+    prev,
+    onClose,
+    inDepthSite,
+    showReservation,
+  ]);
 
   const site = SITES[current];
 
   const handleReserve = () => {
     if (!user) {
-      onShowAuth && onShowAuth();
+      onShowAuth?.();
       return;
     }
-    console.log("Heritage ticket reservation:", site.name);
+
+    setShowReservation(true);
   };
 
-  // ─────────────────────────────────────────────
-  // IN-DEPTH STORY
-  // ─────────────────────────────────────────────
   if (inDepthSite) {
     return (
       <div
@@ -1159,8 +1187,10 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
             width: 40,
             height: 40,
             borderRadius: "50%",
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.15)",
+            background:
+              "rgba(255,255,255,0.08)",
+            border:
+              "1px solid rgba(255,255,255,0.15)",
             color: "#F2E8D0",
             fontSize: "1rem",
             cursor: "pointer",
@@ -1195,7 +1225,6 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
         .dt-bg {
           position: absolute;
           inset: 0;
-          transition: opacity 0.6s ease;
         }
 
         .dt-bg img {
@@ -1203,12 +1232,6 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
           height: 100%;
           object-fit: cover;
           filter: brightness(0.35) saturate(0.8);
-          transition: transform 8s ease;
-          transform: scale(1.08);
-        }
-
-        .dt-bg.playing img {
-          transform: scale(1);
         }
 
         .dt-bg-gradient {
@@ -1217,20 +1240,137 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
           background: linear-gradient(
             105deg,
             rgba(5,10,15,0.95) 0%,
-            rgba(5,10,15,0.7) 50%,
-            rgba(5,10,15,0.4) 100%
+            rgba(5,10,15,0.72) 50%,
+            rgba(5,10,15,0.35) 100%
           );
+        }
+
+        .dt-right-panel {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 32%;
+          height: 100%;
+          z-index: 2;
+          opacity: 0.9;
+        }
+
+        .dt-right-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .dt-right-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            90deg,
+            #050A0F,
+            transparent 40%
+          );
+        }
+
+        .dt-num {
+          position: absolute;
+          right: 5vw;
+          bottom: 8vh;
+          z-index: 3;
+          font-family: 'Playfair Display', serif;
+          font-size: clamp(7rem, 15vw, 15rem);
+          font-weight: 900;
+          color: var(--site-color);
+          opacity: 0.1;
+          line-height: 1;
+        }
+
+        .dt-topbar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 30;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 1.4rem 3vw;
+        }
+
+        .dt-logo {
+          color: #F2E8D0;
+          font-family: 'Space Mono', monospace;
+          font-size: 0.7rem;
+          letter-spacing: 0.08em;
+        }
+
+        .dt-topbar-right {
+          display: flex;
+          align-items: center;
+          gap: 0.7rem;
+        }
+
+        .dt-topbar-reserve-btn {
+          border: 1px solid rgba(201,168,76,0.45);
+          background: rgba(201,168,76,0.1);
+          color: #F2E8D0;
+          border-radius: 999px;
+          padding: 0.55rem 1rem;
+          cursor: pointer;
+          font-size: 0.68rem;
+          font-family: 'Space Mono', monospace;
+        }
+
+        .dt-pause-btn,
+        .dt-close-btn {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.15);
+          background: rgba(0,0,0,0.25);
+          color: #F2E8D0;
+          cursor: pointer;
+        }
+
+        .dt-announce-bar {
+          position: absolute;
+          top: 72px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 25;
+          display: flex;
+          align-items: center;
+          background: rgba(4,8,15,0.75);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(201,168,76,0.25);
+          border-radius: 50px;
+          padding: 0.55rem 1.3rem;
+          max-width: 92vw;
+        }
+
+        .dt-announce-text {
+          font-size: 0.72rem;
+          color: rgba(245,239,224,0.75);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .dt-announce-icon {
+          margin-right: 4px;
         }
 
         .dt-content {
           position: absolute;
           inset: 0;
+          z-index: 10;
           display: flex;
           flex-direction: column;
           justify-content: center;
           padding: 0 8vw;
-          transition: opacity 0.5s ease, transform 0.5s ease;
-          z-index: 10;
+          max-width: 900px;
+          transition:
+            opacity 0.5s ease,
+            transform 0.5s ease;
         }
 
         .dt-content.exit-next {
@@ -1248,264 +1388,152 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
           transform: translateX(0);
         }
 
-        .dt-topbar {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
+        .dt-state-row {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          padding: 1.5rem 2.5rem;
-          z-index: 20;
+          gap: 0.6rem;
+          margin-bottom: 1rem;
         }
 
-        .dt-logo {
-          font-family: 'Space Mono', monospace;
-          font-size: 0.6rem;
-          letter-spacing: 0.25em;
-          color: rgba(255,255,255,0.35);
-          text-transform: uppercase;
-        }
-
-        .dt-topbar-right {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .dt-topbar-reserve-btn {
-          flex-shrink: 0;
-          padding: 0.5rem 1.1rem;
-          border-radius: 50px;
-          border: none;
-          background: linear-gradient(135deg, #C9A84C, #E8C96A);
-          color: #0D1B2A;
-          font-family: 'Space Mono', monospace;
-          font-size: 0.55rem;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: transform 0.2s;
-        }
-
-        .dt-topbar-reserve-btn:hover {
-          transform: translateY(-1px);
-        }
-
-        .dt-pause-btn,
-        .dt-close-btn {
-          width: 36px;
-          height: 36px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.12);
+        .dt-state-dot {
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
-          color: rgba(255,255,255,0.5);
-          cursor: pointer;
-          transition: all 0.2s;
+          background: #C9A84C;
+          box-shadow: 0 0 14px #C9A84C;
         }
 
-        .dt-pause-btn {
-          font-size: 0.75rem;
-        }
-
-        .dt-close-btn {
-          font-size: 1rem;
-        }
-
-        .dt-pause-btn:hover,
-        .dt-close-btn:hover {
-          background: rgba(201,168,76,0.2);
-          border-color: rgba(201,168,76,0.4);
-          color: #C9A84C;
-        }
-
-        .dt-num {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(6rem, 14vw, 12rem);
-          font-weight: 900;
-          color: transparent;
-          -webkit-text-stroke: 1px rgba(255,255,255,0.06);
-          line-height: 1;
-          position: absolute;
-          right: 6vw;
-          top: 50%;
-          transform: translateY(-50%);
-          pointer-events: none;
-          user-select: none;
-          z-index: 1;
+        .dt-state-text {
+          color: rgba(245,239,224,0.65);
+          font-family: 'Space Mono', monospace;
+          font-size: 0.65rem;
         }
 
         .dt-eyebrow {
+          color: var(--site-color);
           font-family: 'Space Mono', monospace;
-          font-size: 0.58rem;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: var(--site-color, #C9A84C);
-          margin-bottom: 1.2rem;
-          display: flex;
-          align-items: center;
-          gap: 0.8rem;
-        }
-
-        .dt-eyebrow::before {
-          content: '';
-          width: 40px;
-          height: 1px;
-          background: var(--site-color, #C9A84C);
+          font-size: 0.7rem;
+          letter-spacing: 0.1em;
+          margin-bottom: 0.8rem;
         }
 
         .dt-title {
+          margin: 0;
+          color: #F8F2E6;
           font-family: 'Playfair Display', serif;
-          font-size: clamp(3rem, 7vw, 6rem);
-          font-weight: 900;
-          color: #F5EFE0;
-          line-height: 1.05;
-          margin-bottom: 0.6rem;
-          max-width: 700px;
+          font-size: clamp(3rem, 7vw, 6.5rem);
+          line-height: 0.95;
+          max-width: 800px;
         }
 
         .dt-tagline {
+          margin-top: 1rem;
+          color: rgba(245,239,224,0.85);
           font-family: 'Playfair Display', serif;
           font-style: italic;
-          font-size: clamp(1rem, 2.2vw, 1.4rem);
-          color: rgba(245,239,224,0.45);
-          margin-bottom: 1.8rem;
+          font-size: clamp(1rem, 2vw, 1.4rem);
         }
 
         .dt-divider {
-          width: 60px;
+          width: 80px;
           height: 2px;
-          background: var(--site-color, #C9A84C);
-          margin-bottom: 1.8rem;
-          border-radius: 2px;
+          margin: 1.5rem 0;
+          background: var(--site-color);
         }
 
         .dt-description {
-          font-size: clamp(0.85rem, 1.4vw, 1rem);
-          color: rgba(245,239,224,0.6);
+          margin: 0;
+          max-width: 650px;
+          color: rgba(245,239,224,0.7);
           line-height: 1.8;
-          max-width: 520px;
-          margin-bottom: 2.5rem;
+          font-size: 0.95rem;
         }
 
         .dt-facts {
           display: flex;
           flex-wrap: wrap;
           gap: 0.6rem;
-          margin-bottom: 3rem;
+          margin-top: 1.5rem;
         }
 
         .dt-fact {
-          font-family: 'Space Mono', monospace;
-          font-size: 0.55rem;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--site-color, #C9A84C);
-          background: rgba(0,0,0,0.3);
-          border: 1px solid rgba(201,168,76,0.2);
-          border-radius: 4px;
-          padding: 5px 12px;
+          padding: 0.5rem 0.8rem;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 999px;
+          background: rgba(255,255,255,0.04);
+          color: rgba(245,239,224,0.8);
+          font-size: 0.72rem;
         }
 
         .dt-actions {
           display: flex;
-          gap: 1rem;
           flex-wrap: wrap;
+          gap: 0.8rem;
+          margin-top: 2rem;
         }
 
         .dt-btn-primary,
         .dt-btn-secondary {
-          display: flex;
-          align-items: center;
-          gap: 0.6rem;
-          padding: 0.9rem 2rem;
-          border-radius: 4px;
-          font-family: 'Space Mono', monospace;
-          font-size: 0.6rem;
-          font-weight: 700;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
+          padding: 0.85rem 1.2rem;
+          border-radius: 10px;
           cursor: pointer;
-          transition: all 0.25s;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 600;
         }
 
         .dt-btn-primary {
-          background: linear-gradient(
-            135deg,
-            var(--site-color, #C9A84C),
-            #E8C96A
-          );
-          color: #0D1B2A;
           border: none;
-        }
-
-        .dt-btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 30px rgba(201,168,76,0.35);
+          background: #C9A84C;
+          color: #07111E;
         }
 
         .dt-btn-secondary {
-          background: transparent;
-          color: rgba(245,239,224,0.7);
-          border: 1px solid rgba(245,239,224,0.2);
-        }
-
-        .dt-btn-secondary:hover {
-          background: rgba(201,168,76,0.08);
-          border-color: rgba(201,168,76,0.4);
-          color: #C9A84C;
+          border: 1px solid rgba(255,255,255,0.15);
+          background: rgba(0,0,0,0.2);
+          color: #F2E8D0;
         }
 
         .dt-bottom {
           position: absolute;
-          bottom: 0;
           left: 0;
           right: 0;
-          padding: 1.5rem 2.5rem;
+          bottom: 0;
+          z-index: 20;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          z-index: 20;
+          gap: 1rem;
+          padding: 1.5rem 3vw;
         }
 
         .dt-progress-bars {
+          flex: 1;
           display: flex;
-          gap: 6px;
-          align-items: center;
+          gap: 0.4rem;
         }
 
         .dt-progress-bar {
-          height: 2px;
+          flex: 1;
+          height: 3px;
           background: rgba(255,255,255,0.15);
-          border-radius: 2px;
-          overflow: hidden;
           cursor: pointer;
-          transition: width 0.3s ease;
-        }
-
-        .dt-progress-bar.active {
-          width: 60px;
-        }
-
-        .dt-progress-bar:not(.active) {
-          width: 20px;
+          overflow: hidden;
         }
 
         .dt-progress-fill {
           height: 100%;
           background: #C9A84C;
-          border-radius: 2px;
           transition: width 0.1s linear;
         }
 
-        .dt-progress-bar:not(.active) .dt-progress-fill {
-          width: 0%;
+        .dt-counter {
+          color: rgba(245,239,224,0.7);
+          font-family: 'Space Mono', monospace;
+          font-size: 0.7rem;
+        }
+
+        .dt-counter span {
+          color: #C9A84C;
         }
 
         .dt-nav-arrows {
@@ -1514,136 +1542,13 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
         }
 
         .dt-arrow {
-          width: 44px;
-          height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          width: 42px;
+          height: 42px;
           border-radius: 50%;
-          color: rgba(255,255,255,0.5);
-          font-size: 1rem;
+          border: 1px solid rgba(255,255,255,0.15);
+          background: rgba(0,0,0,0.25);
+          color: white;
           cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .dt-arrow:hover {
-          background: rgba(201,168,76,0.15);
-          border-color: rgba(201,168,76,0.4);
-          color: #C9A84C;
-        }
-
-        .dt-counter {
-          font-family: 'Space Mono', monospace;
-          font-size: 0.6rem;
-          color: rgba(255,255,255,0.25);
-          letter-spacing: 0.1em;
-        }
-
-        .dt-counter span {
-          color: rgba(255,255,255,0.55);
-        }
-
-        .dt-state-row {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-bottom: 2rem;
-        }
-
-        .dt-state-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: var(--site-color, #C9A84C);
-          animation: dtPulse 2s infinite;
-        }
-
-        @keyframes dtPulse {
-          0%,100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-
-        .dt-state-text {
-          font-family: 'Space Mono', monospace;
-          font-size: 0.5rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(255,255,255,0.25);
-        }
-
-        .dt-right-panel {
-          position: absolute;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          width: 38%;
-          overflow: hidden;
-          pointer-events: none;
-        }
-
-        .dt-right-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          filter: brightness(0.5) saturate(0.7);
-          mask-image: linear-gradient(
-            to right,
-            transparent 0%,
-            rgba(0,0,0,0.7) 40%,
-            black 100%
-          );
-          -webkit-mask-image: linear-gradient(
-            to right,
-            transparent 0%,
-            rgba(0,0,0,0.7) 40%,
-            black 100%
-          );
-          transition: opacity 0.6s ease;
-        }
-
-        .dt-right-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            to right,
-            #050A0F 0%,
-            transparent 40%
-          );
-        }
-
-        /* ───────────────────────────────────────
-           ANNOUNCEMENT BAR (text only now)
-        ─────────────────────────────────────── */
-
-        .dt-announce-bar {
-          position: absolute;
-          top: 70px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 25;
-          display: flex;
-          align-items: center;
-          background: rgba(4,8,15,0.75);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(201,168,76,0.25);
-          border-radius: 50px;
-          padding: 0.55rem 1.3rem;
-          max-width: 92vw;
-        }
-
-        .dt-announce-text {
-          font-family: 'DM Sans', sans-serif;
-          font-size: 0.72rem;
-          color: rgba(245,239,224,0.75);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .dt-announce-icon {
-          margin-right: 4px;
         }
 
         @media (max-width: 768px) {
@@ -1701,20 +1606,16 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
       `}</style>
 
       <div className="dt-overlay">
-
-        {/* Full background */}
         <div className="dt-bg">
           <img
             key={site.id + "-bg"}
             src={site.image}
             alt={site.name}
-            className="playing"
           />
 
           <div className="dt-bg-gradient" />
         </div>
 
-        {/* Right image panel */}
         <div className="dt-right-panel">
           <img
             key={site.id + "-right"}
@@ -1726,15 +1627,15 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
           <div className="dt-right-overlay" />
         </div>
 
-        {/* Ghost number */}
         <div
           className="dt-num"
-          style={{ "--site-color": site.color }}
+          style={{
+            "--site-color": site.color,
+          }}
         >
           {site.num}
         </div>
 
-        {/* Top bar */}
         <div className="dt-topbar">
           <div className="dt-logo">
             Bharatiya Dharohar · Heritage Tour
@@ -1745,12 +1646,16 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
               className="dt-topbar-reserve-btn"
               onClick={handleReserve}
             >
-              {user ? "🎟 Reserve Seat" : "🔒 Sign in to Reserve"}
+              {user
+                ? "🎟 Reserve Seat"
+                : "🔒 Sign in to Reserve"}
             </button>
 
             <button
               className="dt-pause-btn"
-              onClick={() => setPaused((p) => !p)}
+              onClick={() =>
+                setPaused((p) => !p)
+              }
               title={paused ? "Play" : "Pause"}
             >
               {paused ? "▶" : "⏸"}
@@ -1765,35 +1670,36 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
           </div>
         </div>
 
-        {/* ─────────────────────────────────────
-            ANNOUNCEMENT BAR (info only)
-            ───────────────────────────────────── */}
-
         <div className="dt-announce-bar">
           <div className="dt-announce-text">
-            <span className="dt-announce-icon">📢</span>
+            <span className="dt-announce-icon">
+              📢
+            </span>
+
             Heritage Fest 2026 · 28 Nov · Red Fort — limited seats
           </div>
         </div>
 
-        {/* Main slide content */}
         <div
           className={`dt-content ${
             transitioning
               ? `exit-${animDir}`
               : "enter"
           }`}
-          style={{ "--site-color": site.color }}
+          style={{
+            "--site-color": site.color,
+          }}
         >
           <div className="dt-state-row">
             <div className="dt-state-dot" />
+
             <div className="dt-state-text">
               Live · Heritage Discovery
             </div>
           </div>
 
           <div className="dt-eyebrow">
-            {site.state} &nbsp;·&nbsp; {site.era}
+            {site.state} · {site.era}
           </div>
 
           <h1 className="dt-title">
@@ -1811,31 +1717,31 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
           </p>
 
           <div className="dt-facts">
-            {site.facts.map((f, i) => (
+            {site.facts.map((fact, index) => (
               <span
-                key={i}
+                key={index}
                 className="dt-fact"
               >
-                ✦ {f}
+                ✦ {fact}
               </span>
             ))}
           </div>
 
           <div className="dt-actions">
-
             <button
               className="dt-btn-primary"
               onClick={() =>
-                onViewAR && onViewAR(site)
+                onViewAR?.(site)
               }
             >
               📱 View in AR
             </button>
 
-            {/* Explore in depth */}
             <button
               className="dt-btn-secondary"
-              onClick={() => setInDepthSite(site)}
+              onClick={() =>
+                setInDepthSite(site)
+              }
             >
               ↓ Explore in Depth
             </button>
@@ -1846,35 +1752,32 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
             >
               Next Site →
             </button>
-
           </div>
         </div>
 
-        {/* Bottom controls */}
         <div className="dt-bottom">
-
           <div className="dt-progress-bars">
-            {SITES.map((s, i) => (
+            {SITES.map((item, index) => (
               <div
-                key={s.id}
-                className={`dt-progress-bar ${
-                  i === current ? "active" : ""
-                }`}
+                key={item.id}
+                className="dt-progress-bar"
                 onClick={() =>
                   goTo(
-                    i,
-                    i > current ? "next" : "prev"
+                    index,
+                    index > current
+                      ? "next"
+                      : "prev"
                   )
                 }
-                title={s.name}
+                title={item.name}
               >
                 <div
                   className="dt-progress-fill"
                   style={{
                     width:
-                      i === current
+                      index === current
                         ? `${progress}%`
-                        : i < current
+                        : index < current
                         ? "100%"
                         : "0%",
                   }}
@@ -1885,10 +1788,16 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
 
           <div className="dt-counter">
             <span>
-              {String(current + 1).padStart(2, "0")}
+              {String(current + 1).padStart(
+                2,
+                "0"
+              )}
             </span>{" "}
             /{" "}
-            {String(SITES.length).padStart(2, "0")}
+            {String(SITES.length).padStart(
+              2,
+              "0"
+            )}
           </div>
 
           <div className="dt-nav-arrows">
@@ -1906,10 +1815,25 @@ export default function DiscoveryTour({ onClose, onViewAR, onShowAuth }) {
               →
             </button>
           </div>
-
         </div>
-
       </div>
+
+      {showReservation && (
+        <ReservationModal
+          site={site}
+          user={user}
+          onClose={() =>
+            setShowReservation(false)
+          }
+          onReserved={(reservation) => {
+            setShowReservation(false);
+
+            alert(
+              `Reservation confirmed! Your booking code is ${reservation.reservationCode}`
+            );
+          }}
+        />
+      )}
     </>
   );
 }

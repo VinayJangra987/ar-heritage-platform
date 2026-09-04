@@ -1,0 +1,180 @@
+.my-reservations-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgba(2, 7, 15, 0.82);
+  backdrop-filter: blur(14px);
+}
+
+.my-reservations-modal {
+  width: min(1000px, 100%);
+  min-height: calc(100vh - 48px);
+  margin: 0 auto;
+  padding: 32px;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 24px;
+  background: #08131f;
+  color: #f5efe0;
+}
+
+.my-reservations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 34px;
+}
+
+.my-reservations-header span {
+  color: #d4af37;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.my-reservations-header h2 {
+  margin: 8px 0 0;
+  font-size: 2rem;
+}
+
+.my-reservations-header button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.reservation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reservation-ticket {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.015)
+    );
+}
+
+.ticket-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.ticket-main img {
+  width: 120px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.ticket-code {
+  margin-bottom: 6px;
+  color: #d4af37;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+}
+
+.ticket-info h3 {
+  margin: 0 0 10px;
+}
+
+.ticket-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #9ca9b5;
+  font-size: 0.78rem;
+}
+
+.ticket-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.ticket-status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.ticket-status.confirmed {
+  background: rgba(70, 200, 120, 0.12);
+  color: #78d99b;
+}
+
+.ticket-status.cancelled {
+  background: rgba(255, 90, 90, 0.1);
+  color: #ff9b9b;
+}
+
+.ticket-side button {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 110, 110, 0.25);
+  border-radius: 9px;
+  background: transparent;
+  color: #ff9b9b;
+  cursor: pointer;
+}
+
+.reservation-empty,
+.reservation-loading {
+  padding: 70px 20px;
+  text-align: center;
+  color: #9ca9b5;
+}
+
+.reservation-empty div {
+  margin-bottom: 12px;
+  font-size: 3rem;
+}
+
+.reservation-empty h3 {
+  color: white;
+}
+
+.reservation-loading.error {
+  color: #ffaaaa;
+}
+
+@media (max-width: 700px) {
+  .my-reservations-modal {
+    padding: 20px;
+  }
+
+  .reservation-ticket {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ticket-main {
+    align-items: flex-start;
+  }
+
+  .ticket-main img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .ticket-side {
+    align-items: flex-start;
+  }
+}

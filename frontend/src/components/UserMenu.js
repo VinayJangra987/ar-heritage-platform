@@ -158,6 +158,13 @@ const UserMenu = ({ onShowAuth, onShowFavorites, onShowAdmin }) => {
               <span>Admin Panel</span>
             </button>
           )}
+          <button
+  onClick={() => {
+    setShowReservations(true);
+  }}
+>
+  🎟 My Reservations
+</button>
 
           <button className="um-item" onClick={() => { onShowFavorites?.(); setOpen(false); }}>
             <span>❤️</span>

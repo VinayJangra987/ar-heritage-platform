@@ -206,6 +206,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import nearbyRoutes from "./routes/nearbyRoutes.js";
 import tourRoutes from "./routes/tourRoutes.js";
+import reservationRoutes from "./routes/reservationRoutes.js";
 
 const app = express();
 
@@ -247,6 +248,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/nearby", nearbyRoutes);
 app.use("/api/tours", tourRoutes);
+app.use("/api/reservations", reservationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

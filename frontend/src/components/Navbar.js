@@ -197,6 +197,7 @@ const Navbar = ({
   onARClick,
   onFavClick,
   onExploreClick,
+  onAboutClick,
   extraRight,
   onAuthChoiceClick
 }) => {
@@ -253,6 +254,15 @@ const Navbar = ({
             >
               Map
             </button>
+
+            {!user && (
+          <button
+            className="nav-link"
+            onClick={onAboutClick}
+          >
+            About
+          </button>
+              )}
 
             {user && (
               <>
@@ -390,6 +400,18 @@ const Navbar = ({
             >
               🗺 Map View
             </button>
+
+         {!user && (
+            <button
+              className="mobile-nav-link"
+              onClick={() => {
+                onAboutClick?.();
+                setMenuOpen(false);
+              }}
+            >
+              ℹ️ About
+            </button>
+          )}
 
             {user && (
               <>

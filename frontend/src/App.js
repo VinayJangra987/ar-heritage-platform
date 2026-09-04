@@ -3326,46 +3326,48 @@ function AppInner() {
         /> */}
 
 
+<Navbar
+  onSearchOpen={() =>
+    setSearchOpen(true)
+  }
 
-        <Navbar
+  onExploreClick={() => {
+    handleTabSwitch("discover");
+  }}
 
-          onSearchOpen={() =>
-            setSearchOpen(true)
-          }
+  onMapClick={() =>
+    handleTabSwitch("map")
+  }
 
-          onExploreClick={() => {
-            handleTabSwitch("discover");
-          }}
+  onAboutClick={() => {
+    document
+      .getElementById("about")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+  }}
 
-          onMapClick={() =>
-            handleTabSwitch("map")
-          }
+  onFavClick={() =>
+    handleTabSwitch("favourites")
+  }
 
-          onFavClick={() =>
-            handleTabSwitch("favourites")
-          }
+  onARClick={openAR}
 
-          onARClick={openAR}
+  onAuthChoiceClick={() =>
+    setShowAuthChoice(true)
+  }
 
-          onAuthChoiceClick={() =>
-            setShowAuthChoice(true)
-          }
+  extraRight={
+    <UserMenu
+      onShowAuth={() =>
+        setShowAuth(true)
+      }
 
-          extraRight={
-
-            <UserMenu
-
-              onShowAuth={() =>
-                setShowAuth(true)
-              }
-
-              onShowAdmin={openAdmin}
-
-            />
-
-          }
-
-        />
+      onShowAdmin={openAdmin}
+    />
+  }
+/>
 
         {/* ===================================================
             HERO
@@ -4045,6 +4047,245 @@ function AppInner() {
 
         )}
 
+
+
+
+       {!user && (
+  <section
+    id="about"
+    style={{
+      minHeight: "100vh",
+      padding: "100px 8%",
+      background:
+        "linear-gradient(135deg, #0D1B2A 0%, #13263A 100%)",
+      color: "#ffffff",
+      scrollMarginTop: "80px"
+    }}
+  >
+    <div
+      style={{
+        maxWidth: "1200px",
+        margin: "0 auto"
+      }}
+    >
+      <div
+        style={{
+          textAlign: "center",
+          marginBottom: "60px"
+        }}
+      >
+        <div
+          style={{
+            color: "#D4AF37",
+            fontSize: "0.75rem",
+            letterSpacing: "4px",
+            marginBottom: "16px",
+            fontFamily: "'Space Mono', monospace"
+          }}
+        >
+          ABOUT BHARATIYA DHAROHAR
+        </div>
+
+        <h2
+          style={{
+            fontSize: "clamp(2.2rem, 5vw, 4rem)",
+            margin: 0,
+            lineHeight: 1.1
+          }}
+        >
+          Preserving India's Heritage
+          <br />
+
+          <span
+            style={{
+              color: "#D4AF37",
+              fontStyle: "italic"
+            }}
+          >
+            Through Technology
+          </span>
+        </h2>
+
+        <p
+          style={{
+            maxWidth: "800px",
+            margin: "25px auto 0",
+            color: "#B8C1CC",
+            lineHeight: 1.8,
+            fontSize: "1.05rem"
+          }}
+        >
+          Bharatiya Dharohar is a digital heritage platform created to
+          help people discover, explore and experience India's rich
+          cultural and historical heritage through modern technology.
+        </p>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(250px, 1fr))",
+          gap: "22px"
+        }}
+      >
+        <div
+          style={{
+            padding: "30px",
+            borderRadius: "16px",
+            border:
+              "1px solid rgba(212, 175, 55, 0.25)",
+            background:
+              "rgba(255,255,255,0.04)"
+          }}
+        >
+          <div
+            style={{
+              fontSize: "2.5rem",
+              marginBottom: "18px"
+            }}
+          >
+            🏛️
+          </div>
+
+          <h3
+            style={{
+              marginBottom: "12px",
+              color: "#D4AF37"
+            }}
+          >
+            Explore Heritage
+          </h3>
+
+          <p
+            style={{
+              color: "#B8C1CC",
+              lineHeight: 1.7,
+              margin: 0
+            }}
+          >
+            Discover historical monuments, cultural landmarks and
+            important heritage sites across India.
+          </p>
+        </div>
+
+        <div
+          style={{
+            padding: "30px",
+            borderRadius: "16px",
+            border:
+              "1px solid rgba(212, 175, 55, 0.25)",
+            background:
+              "rgba(255,255,255,0.04)"
+          }}
+        >
+          <div
+            style={{
+              fontSize: "2.5rem",
+              marginBottom: "18px"
+            }}
+          >
+            🗺️
+          </div>
+
+          <h3
+            style={{
+              marginBottom: "12px",
+              color: "#D4AF37"
+            }}
+          >
+            Interactive Discovery
+          </h3>
+
+          <p
+            style={{
+              color: "#B8C1CC",
+              lineHeight: 1.7,
+              margin: 0
+            }}
+          >
+            Navigate heritage locations and discover the stories,
+            history and cultural importance behind them.
+          </p>
+        </div>
+
+        <div
+          style={{
+            padding: "30px",
+            borderRadius: "16px",
+            border:
+              "1px solid rgba(212, 175, 55, 0.25)",
+            background:
+              "rgba(255,255,255,0.04)"
+          }}
+        >
+          <div
+            style={{
+              fontSize: "2.5rem",
+              marginBottom: "18px"
+            }}
+          >
+            📱
+          </div>
+
+          <h3
+            style={{
+              marginBottom: "12px",
+              color: "#D4AF37"
+            }}
+          >
+            AR Experience
+          </h3>
+
+          <p
+            style={{
+              color: "#B8C1CC",
+              lineHeight: 1.7,
+              margin: 0
+            }}
+          >
+            Experience heritage through interactive augmented reality
+            and immersive digital experiences.
+          </p>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: "60px",
+          padding: "35px",
+          borderLeft: "4px solid #D4AF37",
+          background:
+            "rgba(212, 175, 55, 0.06)",
+          borderRadius: "0 12px 12px 0"
+        }}
+      >
+        <h2
+          style={{
+            color: "#D4AF37",
+            marginTop: 0
+          }}
+        >
+          Our Mission
+        </h2>
+
+        <p
+          style={{
+            color: "#D8DEE6",
+            lineHeight: 1.9,
+            fontSize: "1.05rem",
+            marginBottom: 0,
+            maxWidth: "900px"
+          }}
+        >
+          Our mission is to make India's cultural heritage more
+          accessible, engaging and interactive for everyone by combining
+          history, technology and immersive digital experiences.
+        </p>
+      </div>
+    </div>
+  </section>
+)}
 
         {/* ===================================================
             FOOTER
