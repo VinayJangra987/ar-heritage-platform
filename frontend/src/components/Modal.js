@@ -645,8 +645,9 @@
 import { useEffect, useState } from "react";
 import { reviewsAPI } from "../api";
 import { useAuth } from "../context/AuthContext";
+import ReservationModal from "./ReservationModal";
 
-export default function Modal({ site, onClose, recommendations, onNavigate, onARClick, isFav, onToggleFav }) {
+export default function Modal({ site, onClose, recommendations, onNavigate, onARClick, isFav,onShowAuth, onToggleFav }) {
   const { user } = useAuth();
   const [imgIdx, setImgIdx]       = useState(0);
   const [tab, setTab]             = useState("overview");
@@ -666,6 +667,7 @@ export default function Modal({ site, onClose, recommendations, onNavigate, onAR
   const [rvSuccess, setRvSuccess] = useState("");
   const [likingId, setLikingId]     = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [showReservation, setShowReservation] = useState(false);
 
 
 
@@ -857,6 +859,19 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
     }
   };
 
+    // 🎟️ Reserve a seat for this site
+  const handleReserve = () => {
+    if (!user) {
+      if (onShowAuth) {
+        onShowAuth();
+      } else {
+        alert("Reserve karne ke liye pehle login karo!");
+      }
+      return;
+    }
+    setShowReservation(true);
+  };
+
   if (!site) return null;
 
   const images = site.images?.length
@@ -1034,17 +1049,8 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
           .modal-header { padding:1.25rem 1.25rem 0; }
           .modal-tabs { margin:0 1.25rem; }
           .modal-fav-btn[style] { display:none; }
-        }
-
-        .modal-panel {
-        background: #0F1E2F;
-        border: 1px solid rgba(201,168,76,0.2);
-        border-radius: 24px;
-        max-width: min(900px, calc(100vw - 3rem));  
-        width: 100%;
-        max-height: 90vh; overflow-y: auto;
-        ...
-      `}</style>
+      }
+       `}</style>
 
       <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
         <div className="modal-panel">
@@ -1079,6 +1085,17 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
               title="Share this site"
             >
               📤
+            </button>
+             
+
+               {/* Reserve Seat button */}
+            <button
+              className="modal-fav-btn"
+              style={{ right: "13rem" }}
+              onClick={handleReserve}
+              title="Reserve a seat"
+            >
+              🎟️
             </button>
 
             <button className="modal-close" onClick={onClose}>✕</button>
@@ -1371,6 +1388,17 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
           </div>
         </div>
       </div>
+            {showReservation && (
+        <ReservationModal
+          site={site}
+          user={user}
+          onClose={() => setShowReservation(false)}
+          onReserved={(reservation) => {
+            setShowReservation(false);
+            alert(`Reservation confirmed! Your booking code is ${reservation.reservationCode}`);
+          }}
+        />
+      )}
     </>
   );
 }
