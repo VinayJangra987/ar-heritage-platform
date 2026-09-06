@@ -79,6 +79,27 @@ export default function AdminPanel({ onClose, onMonumentsUpdate, adminUser }) {
   const [apiLoading,    setApiLoading]    = useState(false);
   const [apiError,      setApiError]      = useState("");
 
+
+  useEffect(() => {
+  const fetchFromBackend = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE}/api/heritage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.sites?.length > 0) {
+        setMonuments(data.sites);
+        saveMonuments(data.sites); // localStorage ko bhi sync kar do
+      }
+    } catch (err) {
+      console.error("Failed to load monuments from backend:", err);
+    }
+  };
+
+  fetchFromBackend();
+}, []);
+
   useEffect(() => {
     if (onMonumentsUpdate) onMonumentsUpdate(monuments);
   }, [monuments, onMonumentsUpdate]);

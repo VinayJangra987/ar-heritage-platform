@@ -1,6 +1,6 @@
 import './AuthChoice.css';
 
-const AuthChoice = ({ onSelectLogin, onSelectSignup, onSelectAdmin, onSelectGuest }) => {
+const AuthChoice = ({ onSelectLogin, onSelectSignup, onSelectAdmin}) => {
   return (
     <div className="auth-choice-overlay">
       <div className="auth-choice-card">

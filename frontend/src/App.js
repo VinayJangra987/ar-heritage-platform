@@ -2631,6 +2631,9 @@ function AppInner() {
   const [showAdmin, setShowAdmin] =
     useState(false);
 
+  const [pendingAdmin, setPendingAdmin] =
+    useState(false);
+    
   const [recommendations, setRecommendations] =
     useState([]);
 
@@ -2743,6 +2746,19 @@ function AppInner() {
     };
 
   }, []);
+
+
+   useEffect(() => {
+
+    if (user && pendingAdmin) {
+
+      setShowAdmin(true);
+
+      setPendingAdmin(false);
+
+    }
+
+  }, [user, pendingAdmin]);
 
 
   // ----------------------------------------------------------
@@ -3050,6 +3066,8 @@ function AppInner() {
 
     if (!user) {
 
+      setPendingAdmin(true);
+
       setAuthMode("login");
 
       setShowAuth(true);
@@ -3057,8 +3075,12 @@ function AppInner() {
       return;
     }
 
+if (user.role !== "admin") {     
+    alert("You don't have admin access.");
+    return;
+  }
 
-    setShowAdmin(true);
+  setShowAdmin(true);
 
   };
 
@@ -4035,17 +4057,9 @@ function AppInner() {
             ADMIN
         =================================================== */}
 
-        {showAdmin && user && (
-
-          <AdminPanel
-
-            onClose={() =>
-              setShowAdmin(false)
-            }
-
-          />
-
-        )}
+        {showAdmin && user?.role === "admin" && (
+  <AdminPanel onClose={() => setShowAdmin(false)} adminUser={user} />
+)}
 
 
 
