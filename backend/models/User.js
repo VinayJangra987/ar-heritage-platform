@@ -119,8 +119,8 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
     badges: [{
-  id: String,        // "unesco-hunter", "first-review", "ar-explorer"
-  earnedAt: Date
+      id: String,    
+      earnedAt: Date
   }],
   streak: { current: Number, longest: Number, lastVisitDate: Date },
   },
