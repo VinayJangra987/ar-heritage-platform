@@ -157,9 +157,8 @@
 //   }
 // };
 
-
 import Reservation from "../models/Reservation.js";
-import { sendBookingConfirmationEmail } from "../utils/emailService.js";
+import { sendBookingConfirmationEmail, sendCancellationEmail } from "../utils/emailService.js";
 
 const generateReservationCode = () => {
   const random = Math.random()
@@ -227,12 +226,9 @@ export const createReservation = async (req, res) => {
       siteId,
       siteName,
       siteImage: siteImage || "",
-
       visitDate: selectedDate,
       timeSlot,
-
       seats: seatCount,
-
       visitorName,
       visitorEmail,
       visitorPhone: visitorPhone || "",
@@ -274,6 +270,7 @@ export const createReservation = async (req, res) => {
     });
   }
 };
+
 
 export const getMyReservations = async (req, res) => {
   try {
@@ -321,6 +318,27 @@ export const cancelReservation = async (req, res) => {
     reservation.status = "cancelled";
 
     await reservation.save();
+
+    // ── Send cancellation email (fail ho jaye toh bhi cancel successful rahe) ──
+    try {
+      await sendCancellationEmail(
+        reservation.visitorEmail,
+        reservation.visitorName,
+        {
+          reservationCode: reservation.reservationCode,
+          siteName: reservation.siteName,
+          visitDate: reservation.visitDate,
+          timeSlot: reservation.timeSlot,
+          seats: reservation.seats,
+        }
+      );
+    } catch (emailErr) {
+      console.error(
+        "⚠️ Reservation cancelled but cancellation email failed:",
+        emailErr.message
+      );
+  
+    }
 
     res.status(200).json({
       success: true,

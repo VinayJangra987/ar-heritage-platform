@@ -613,3 +613,138 @@ export const sendBookingConfirmationEmail = async (
     throw error;
   }
 };
+
+
+// ── Send Reservation Cancellation Email ──
+export const sendCancellationEmail = async (
+  email,
+  name,
+  reservationDetails
+) => {
+  try {
+    if (!process.env.MAILJET_API_KEY) {
+      throw new Error("MAILJET_API_KEY is missing");
+    }
+    if (!process.env.MAILJET_SECRET_KEY) {
+      throw new Error("MAILJET_SECRET_KEY is missing");
+    }
+    if (!process.env.MAILJET_SENDER_EMAIL) {
+      throw new Error("MAILJET_SENDER_EMAIL is missing");
+    }
+
+    const {
+      reservationCode,
+      siteName,
+      visitDate,
+      timeSlot,
+      seats,
+    } = reservationDetails;
+
+    const formattedDate = new Date(visitDate).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    console.log("📧 Sending Cancellation Email via Mailjet API...");
+    console.log("📨 Recipient:", email);
+    console.log("🎫 Reservation Code:", reservationCode);
+
+    const subject = `Reservation Cancelled - ${siteName} | Bharatiya Dharohar`;
+
+    const request = await mailjet
+      .post("send", { version: "v3.1" })
+      .request({
+        Messages: [
+          {
+            From: {
+              Email: process.env.MAILJET_SENDER_EMAIL,
+              Name: process.env.MAILJET_SENDER_NAME || "Bharatiya Dharohar",
+            },
+            To: [
+              {
+                Email: email,
+                Name: name || "Visitor",
+              },
+            ],
+            Subject: subject,
+
+            TextPart: `Your reservation has been cancelled.
+
+Reservation Code: ${reservationCode}
+Site: ${siteName}
+Date: ${formattedDate}
+Time Slot: ${timeSlot}
+Seats: ${seats}
+
+If this wasn't you, please contact support immediately.
+
+Thank you for using Bharatiya Dharohar.`,
+
+            HTMLPart: `
+              <div style="
+                font-family: Arial, sans-serif;
+                max-width: 480px;
+                margin: auto;
+                padding: 30px;
+                background: #0D1B2A;
+                color: #F2E8D0;
+                border-radius: 12px;
+              ">
+                <h2 style="color: #C9A84C;">🏛 Bharatiya Dharohar</h2>
+
+                <p>Hello <strong>${name || "Visitor"}</strong>,</p>
+
+                <p>Your reservation has been <strong style="color:#E07A5F;">cancelled</strong>.</p>
+
+                <div style="
+                  background: rgba(224, 122, 95, 0.1);
+                  border-radius: 8px;
+                  padding: 20px;
+                  margin: 20px 0;
+                ">
+                  <p style="margin: 6px 0;"><strong>Reservation Code:</strong> ${reservationCode}</p>
+                  <p style="margin: 6px 0;"><strong>Site:</strong> ${siteName}</p>
+                  <p style="margin: 6px 0;"><strong>Date:</strong> ${formattedDate}</p>
+                  <p style="margin: 6px 0;"><strong>Time Slot:</strong> ${timeSlot}</p>
+                  <p style="margin: 6px 0;"><strong>Seats:</strong> ${seats}</p>
+                </div>
+
+                <p style="color: #aaa; font-size: 13px;">
+                  If this wasn't you, please contact support immediately.
+                </p>
+              </div>
+            `,
+          },
+        ],
+      });
+
+    console.log("📬 MAILJET RESPONSE:", JSON.stringify(request.body, null, 2));
+
+    const message = request.body?.Messages?.[0];
+
+    if (!message) {
+      throw new Error("Invalid response received from Mailjet");
+    }
+    if (message.Status !== "success") {
+      throw new Error(
+        message.Errors?.[0]?.ErrorMessage || "Mailjet failed to send email"
+      );
+    }
+
+    console.log("✅ CANCELLATION EMAIL SENT SUCCESSFULLY");
+
+    return request.body;
+
+  } catch (error) {
+    console.error("❌ MAILJET EMAIL ERROR:");
+    console.error(
+      error.response?.data ||
+      error.response?.body ||
+      error.body ||
+      error.message ||
+      error
+    );
+    throw error;
+  }
+};
