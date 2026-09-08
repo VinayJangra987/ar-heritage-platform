@@ -4,11 +4,14 @@ import {
   createReservation,
   getMyReservations,
   cancelReservation,
+  exportReservations 
 } from "../controllers/ReservationController.js";
 
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+router.get("/export", protect, adminOnly, exportReservations);  
 
 router.post("/", protect, createReservation);
 

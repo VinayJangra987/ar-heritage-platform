@@ -158,6 +158,7 @@
 // };
 
 import Reservation from "../models/Reservation.js";
+import ExcelJS from "exceljs";
 import { sendBookingConfirmationEmail, sendCancellationEmail } from "../utils/emailService.js";
 
 const generateReservationCode = () => {
@@ -293,6 +294,79 @@ export const getMyReservations = async (req, res) => {
     });
   }
 };
+
+// ════════════════════════════════════════════════
+// EXPORT ALL RESERVATIONS TO EXCEL (Admin only)
+// ════════════════════════════════════════════════
+export const exportReservations = async (req, res) => {
+  try {
+    const reservations = await Reservation.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Reservations");
+
+    sheet.columns = [
+      { header: "Reservation Code", key: "reservationCode", width: 22 },
+      { header: "Site Name", key: "siteName", width: 25 },
+      { header: "Visit Date", key: "visitDate", width: 15 },
+      { header: "Time Slot", key: "timeSlot", width: 20 },
+      { header: "Seats", key: "seats", width: 10 },
+      { header: "Visitor Name", key: "visitorName", width: 20 },
+      { header: "Visitor Email", key: "visitorEmail", width: 28 },
+      { header: "Visitor Phone", key: "visitorPhone", width: 16 },
+      { header: "Status", key: "status", width: 12 },
+      { header: "Special Request", key: "specialRequest", width: 25 },
+      { header: "Booked On", key: "createdAt", width: 20 },
+    ];
+
+    // ── Header row styling ──
+    sheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
+    sheet.getRow(1).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF0D1B2A" },
+    };
+
+    reservations.forEach((r) => {
+      sheet.addRow({
+        reservationCode: r.reservationCode,
+        siteName: r.siteName,
+        visitDate: new Date(r.visitDate).toLocaleDateString("en-IN"),
+        timeSlot: r.timeSlot,
+        seats: r.seats,
+        visitorName: r.visitorName,
+        visitorEmail: r.visitorEmail,
+        visitorPhone: r.visitorPhone || "-",
+        status: r.status,
+        specialRequest: r.specialRequest || "-",
+        createdAt: new Date(r.createdAt).toLocaleString("en-IN"),
+      });
+    });
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=reservations-${Date.now()}.xlsx`
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    console.error("Export reservations error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Unable to export reservations.",
+    });
+  }
+};
+
 
 export const cancelReservation = async (req, res) => {
   try {
