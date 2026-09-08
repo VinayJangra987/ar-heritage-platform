@@ -1,10 +1,10 @@
 // import { useEffect, useState, useRef, useCallback } from "react";
-
 // // ═══════════════════════════════════════════
 // // REAL SKETCHFAB MODEL IDs — all free & embeddable
 // // ═══════════════════════════════════════════
 // const CATEGORIES = {
 //   all:           { label: "All",          icon: "⬡" },
+//    nearby:        { label: "Near You",     icon: "📍" },
 //   camera:        { label: "Live AR",       icon: "📷" },
 //   mughal:        { label: "Mughal",       icon: "🕌" },
 //   temple:        { label: "Temples",      icon: "🛕" },
@@ -133,6 +133,19 @@
 //   },
 // ];
 
+
+// const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+// // Backend 'type' field ko AR categories se map karta hai
+// const typeToCategory = {
+//   architectural: "fort",
+//   religious: "temple",
+//   archaeological: "archaeological",
+//   natural: "sculpture",
+//   intangible: "sculpture",
+// };
+
+
 // export default function ARView({ onClose, initialSite }) {
 //   const [activeCategory, setActiveCategory] = useState("all");
 //   const [activeSite,     setActiveSite]     = useState(AR_SITES[0]);
@@ -147,6 +160,9 @@
 //   const [overlayX,       setOverlayX]       = useState(50);  // % from left
 //   const [overlayY,       setOverlayY]       = useState(50);  // % from top
 //   const [isDragging,     setIsDragging]     = useState(false);
+//   const [initializing,   setInitializing]   = useState(true); // radar scan intro
+//   const [nearbySites,   setNearbySites]   = useState([]);
+// const [loadingNearby, setLoadingNearby] = useState(false);
 //   const videoRef  = useRef(null);
 //   const dragRef   = useRef({ startX:0, startY:0, startOX:50, startOY:50 });
 
@@ -154,6 +170,12 @@
 //   useEffect(() => {
 //     document.body.style.overflow = "hidden";
 //     return () => { document.body.style.overflow = ""; };
+//   }, []);
+
+//   // Radar scan intro — plays once on open, then reveals the AR interface
+//   useEffect(() => {
+//     const t = setTimeout(() => setInitializing(false), 1800);
+//     return () => clearTimeout(t);
 //   }, []);
 
 //   // Try to match initialSite
@@ -261,6 +283,61 @@
 //         @keyframes arIn  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 //         @keyframes spin  { to { transform:rotate(360deg); } }
 //         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+//         /* ── Radar scan intro ── */
+//         @keyframes radarSpin   { to { transform:rotate(360deg); } }
+//         @keyframes radarPulse  { 0%{transform:scale(0.55);opacity:0.8} 100%{transform:scale(2);opacity:0} }
+//         @keyframes radarGlow   { 0%,100%{box-shadow:0 0 18px rgba(201,168,76,0.5)} 50%{box-shadow:0 0 38px rgba(201,168,76,0.9)} }
+//         @keyframes dotBlink    { 0%,20%{opacity:0.15} 50%{opacity:1} 100%{opacity:0.15} }
+//         @keyframes initFadeOut { to { opacity:0; visibility:hidden; } }
+
+//         .ar-init-overlay {
+//           position:absolute; inset:0; z-index:60;
+//           background:#04080F;
+//           display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.6rem;
+//           transition:opacity 0.6s ease, visibility 0.6s ease;
+//         }
+//         .ar-init-overlay.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+
+//         .ar-radar { position:relative; width:150px; height:150px; display:flex; align-items:center; justify-content:center; }
+//         .ar-radar-sweep {
+//           position:absolute; inset:0; border-radius:50%;
+//           background:conic-gradient(from 0deg, rgba(201,168,76,0.6), transparent 38%);
+//           animation:radarSpin 1.7s linear infinite;
+//         }
+//         .ar-radar-ring {
+//           position:absolute; border:1px solid rgba(201,168,76,0.18); border-radius:50%;
+//         }
+//         .ar-radar-ring.r1 { inset:0; }
+//         .ar-radar-ring.r2 { inset:22px; }
+//         .ar-radar-ring.r3 { inset:44px; }
+//         .ar-radar-pulse {
+//           position:absolute; width:56px; height:56px; border-radius:50%;
+//           border:1px solid rgba(201,168,76,0.55);
+//           animation:radarPulse 2s ease-out infinite;
+//         }
+//         .ar-radar-pulse.delay { animation-delay:1s; }
+//         .ar-radar-core {
+//           position:relative; z-index:2; width:42px; height:42px; border-radius:50%;
+//           background:radial-gradient(circle, #E8C96A, #8B6F47);
+//           display:flex; align-items:center; justify-content:center;
+//           font-size:1.15rem;
+//           animation:radarGlow 2s ease-in-out infinite;
+//         }
+
+//         .ar-init-text {
+//           font-family:'Space Mono',monospace; font-size:0.65rem;
+//           color:rgba(201,168,76,0.85); letter-spacing:0.22em; text-transform:uppercase;
+//           display:flex; align-items:center; gap:2px;
+//         }
+//         .ar-init-text .dot { animation:dotBlink 1.4s infinite; }
+//         .ar-init-text .dot:nth-child(2) { animation-delay:0.2s; }
+//         .ar-init-text .dot:nth-child(3) { animation-delay:0.4s; }
+
+//         .ar-init-sub {
+//           font-family:'Space Mono',monospace; font-size:0.52rem;
+//           color:rgba(242,232,208,0.3); letter-spacing:0.15em; text-transform:uppercase;
+//         }
 
 //         .ar-overlay {
 //           position:fixed; inset:0; z-index:9999;
@@ -426,12 +503,11 @@
 //           transition:opacity 0.5s;
 //         }
 //         .ar-frame-loading.hidden { opacity:0; pointer-events:none; }
-//         .ar-spinner {
-//           width:44px; height:44px;
-//           border:2px solid rgba(201,168,76,0.1);
-//           border-top-color:#C9A84C;
-//           border-radius:50%; animation:spin 0.9s linear infinite;
-//         }
+//         .ar-frame-radar { position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center; }
+//         .ar-frame-radar .ar-radar-sweep { animation-duration:1.3s; }
+//         .ar-frame-radar .ar-radar-ring.r1 { inset:0; }
+//         .ar-frame-radar .ar-radar-ring.r2 { inset:14px; }
+//         .ar-frame-radar .ar-radar-core { width:24px; height:24px; font-size:0.7rem; }
 //         .ar-loading-text {
 //           font-family:'Space Mono',monospace; font-size:0.58rem;
 //           color:rgba(242,232,208,0.3); letter-spacing:0.15em; text-transform:uppercase;
@@ -682,6 +758,26 @@
 
 //       <div className="ar-overlay">
 
+//         {/* ── Radar scan intro ── */}
+//         <div className={`ar-init-overlay ${initializing ? "" : "hidden"}`}>
+//           <div className="ar-radar">
+//             <div className="ar-radar-sweep" />
+//             <div className="ar-radar-ring r1" />
+//             <div className="ar-radar-ring r2" />
+//             <div className="ar-radar-ring r3" />
+//             <div className="ar-radar-pulse" />
+//             <div className="ar-radar-pulse delay" />
+//             <div className="ar-radar-core">📡</div>
+//           </div>
+//           <div className="ar-init-text">
+//             Initializing AR Scanner
+//             <span className="dot">.</span>
+//             <span className="dot">.</span>
+//             <span className="dot">.</span>
+//           </div>
+//           <div className="ar-init-sub">Calibrating heritage model registry</div>
+//         </div>
+
 //         <div className="ar-top">
 //           <div className="ar-top-left">
 //             <span className="ar-badge">📱 AR View</span>
@@ -768,7 +864,12 @@
 //             {activeTab === "3d" && (
 //               <div className="ar-frame-wrap">
 //                 <div className={`ar-frame-loading ${frameLoaded ? "hidden" : ""}`}>
-//                   <div className="ar-spinner" />
+//                   <div className="ar-frame-radar">
+//                     <div className="ar-radar-sweep" />
+//                     <div className="ar-radar-ring r1" />
+//                     <div className="ar-radar-ring r2" />
+//                     <div className="ar-radar-core">⬡</div>
+//                   </div>
 //                   <div className="ar-loading-text">Loading 3D Model...</div>
 //                 </div>
 //                 <iframe
@@ -947,6 +1048,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 // ═══════════════════════════════════════════
 const CATEGORIES = {
   all:           { label: "All",          icon: "⬡" },
+  nearby:        { label: "Near You",     icon: "📍" },
   camera:        { label: "Live AR",       icon: "📷" },
   mughal:        { label: "Mughal",       icon: "🕌" },
   temple:        { label: "Temples",      icon: "🛕" },
@@ -1075,6 +1177,20 @@ const AR_SITES = [
   },
 ];
 
+// ═══════════════════════════════════════════
+// BACKEND CONFIG — for fetching real nearby sites
+// ═══════════════════════════════════════════
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+// Maps backend Heritage 'type' field to AR category buckets
+const typeToCategory = {
+  architectural: "fort",
+  religious: "temple",
+  archaeological: "archaeological",
+  natural: "sculpture",
+  intangible: "sculpture",
+};
+
 export default function ARView({ onClose, initialSite }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeSite,     setActiveSite]     = useState(AR_SITES[0]);
@@ -1090,6 +1206,12 @@ export default function ARView({ onClose, initialSite }) {
   const [overlayY,       setOverlayY]       = useState(50);  // % from top
   const [isDragging,     setIsDragging]     = useState(false);
   const [initializing,   setInitializing]   = useState(true); // radar scan intro
+
+  // ── NEW: real nearby sites from backend ──
+  const [nearbySites,   setNearbySites]   = useState([]);
+  const [loadingNearby, setLoadingNearby] = useState(false);
+  const [nearbyError,   setNearbyError]   = useState("");
+
   const videoRef  = useRef(null);
   const dragRef   = useRef({ startX:0, startY:0, startOX:50, startOY:50 });
 
@@ -1105,26 +1227,114 @@ export default function ARView({ onClose, initialSite }) {
     return () => clearTimeout(t);
   }, []);
 
-  // Try to match initialSite
+  // ── NEW: fetch real nearby heritage sites from backend ──
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setNearbyError("Geolocation not supported by this browser.");
+      return;
+    }
+
+    setLoadingNearby(true);
+    setNearbyError("");
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+
+        try {
+          const res = await fetch(
+            `${API_BASE}/nearby?lat=${lat}&lng=${lng}&radius=300&limit=20`
+          );
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+
+          const mapped = (data.sites || []).map((site) => {
+            const [slng, slat] = site.location?.coordinates || [];
+            return {
+              id: site._id,
+              name: site.name,
+              subtitle: site.type
+                ? site.type[0].toUpperCase() + site.type.slice(1)
+                : "Heritage Site",
+              location: [site.district, site.state].filter(Boolean).join(", "),
+              era: "",
+              category: typeToCategory[site.type] || "sculpture",
+              unesco: false,
+              sketchfabId: null, // real DB sites have no 3D model — camera AR only
+              poster: site.thumbnail,
+              fact: `Located ${site.distance} km from your current location.`,
+              color: "#C9A84C",
+              lat: slat,
+              lng: slng,
+              distance: site.distance,
+            };
+          });
+
+          setNearbySites(mapped);
+        } catch (err) {
+          console.error("Nearby fetch (ARView) failed:", err);
+          setNearbyError("Could not load nearby sites. Showing curated collection only.");
+        } finally {
+          setLoadingNearby(false);
+        }
+      },
+      () => {
+        setLoadingNearby(false);
+        setNearbyError("Location permission denied. Enable location to see sites near you.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  // Combine curated 3D-model sites with real nearby sites from backend
+  const combinedSites = [
+    ...AR_SITES.map((s) => ({ ...s, hasModel: true })),
+    ...nearbySites,
+  ];
+
+  // Try to match initialSite (checked against the combined list)
   useEffect(() => {
     if (!initialSite) return;
-    const match = AR_SITES.find(s =>
+    const match = combinedSites.find(s =>
       initialSite.name?.toLowerCase().includes(s.name.toLowerCase().split(" ")[0]) ||
       initialSite.type === s.category
     );
     if (match) setActiveSite(match);
-  }, [initialSite]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSite, nearbySites]);
 
   // Reset frameLoaded when site changes
   useEffect(() => { setFrameLoaded(false); }, [activeSite.id]);
 
-  const filtered = AR_SITES.filter(s => {
-    const matchCat = activeCategory === "all" || s.category === activeCategory;
-    const matchQ   = !searchQ || s.name.toLowerCase().includes(searchQ.toLowerCase()) ||
-                     s.location.toLowerCase().includes(searchQ.toLowerCase());
+  // If the active site has no 3D model, force the camera tab
+  useEffect(() => {
+    if (!activeSite.sketchfabId && activeTab === "3d") {
+      setActiveTab("camera");
+    }
+  }, [activeSite, activeTab]);
+
+  let filtered = combinedSites.filter(s => {
+    const matchCat =
+      activeCategory === "all"
+        ? true
+        : activeCategory === "nearby"
+        ? s.distance !== undefined
+        : s.category === activeCategory;
+
+    const matchQ =
+      !searchQ ||
+      s.name.toLowerCase().includes(searchQ.toLowerCase()) ||
+      s.location.toLowerCase().includes(searchQ.toLowerCase());
+
     return matchCat && matchQ;
   });
 
+  if (activeCategory === "nearby") {
+    filtered = [...filtered].sort(
+      (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)
+    );
+  }
 
   // ── Camera helpers ──────────────────────────────────────────
   const startCamera = useCallback(async () => {
@@ -1355,6 +1565,17 @@ export default function ARView({ onClose, initialSite }) {
           font-family:'Space Mono',monospace; font-size:0.58rem;
           color:rgba(242,232,208,0.2); letter-spacing:0.1em;
         }
+        .ar-left-status {
+          padding:0.6rem 0.7rem; margin-bottom:0.3rem;
+          border-radius:9px; background:rgba(201,168,76,0.06);
+          border:1px solid rgba(201,168,76,0.15);
+          font-family:'Space Mono',monospace; font-size:0.48rem;
+          color:rgba(201,168,76,0.7); letter-spacing:0.06em; line-height:1.5;
+        }
+        .ar-left-status.error {
+          background:rgba(224,123,84,0.08); border-color:rgba(224,123,84,0.25);
+          color:rgba(224,123,84,0.85);
+        }
         .ar-item {
           display:flex; align-items:center; gap:0.7rem;
           padding:0.65rem 0.7rem; border-radius:11px;
@@ -1391,6 +1612,18 @@ export default function ARView({ onClose, initialSite }) {
           padding:1px 5px; border-radius:4px; font-weight:700;
           letter-spacing:0.08em;
         }
+        .ar-item-dist {
+          position:absolute; top:6px; right:6px;
+          font-family:'Space Mono',monospace; font-size:0.42rem;
+          background:rgba(74,200,120,0.18); color:#4AC878;
+          padding:1px 5px; border-radius:4px; font-weight:700;
+          letter-spacing:0.08em;
+        }
+        .ar-item-nomodel {
+          font-family:'Space Mono',monospace; font-size:0.4rem;
+          color:rgba(242,232,208,0.2); letter-spacing:0.06em;
+          margin-top:1px;
+        }
 
         .ar-center {
           position:relative; background:#070D14;
@@ -1418,6 +1651,7 @@ export default function ARView({ onClose, initialSite }) {
         }
         .ar-viewer-badge.gold { background:rgba(201,168,76,0.15); color:#C9A84C; border:1px solid rgba(201,168,76,0.25); }
         .ar-viewer-badge.unesco { background:#C9A84C; color:#0D1B2A; }
+        .ar-viewer-badge.green { background:rgba(74,200,120,0.15); color:#4AC878; border:1px solid rgba(74,200,120,0.25); }
 
         .ar-frame-wrap {
           flex:1; position:relative; overflow:hidden;
@@ -1443,6 +1677,15 @@ export default function ARView({ onClose, initialSite }) {
         .ar-frame-wrap iframe {
           position:absolute; inset:0;
           width:100%; height:100%; border:none;
+        }
+        .ar-no-model {
+          flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+          gap:1rem; padding:2rem; text-align:center;
+        }
+        .ar-no-model-icon { font-size:2.5rem; opacity:0.5; }
+        .ar-no-model-text {
+          font-family:'Poppins',sans-serif; font-size:0.85rem;
+          color:rgba(242,232,208,0.4); max-width:320px; line-height:1.6;
         }
 
         .ar-right {
@@ -1723,9 +1966,12 @@ export default function ARView({ onClose, initialSite }) {
 
         <div className="ar-cats">
           {Object.entries(CATEGORIES).map(([key, cat]) => {
-            const count = key === "all"
-              ? AR_SITES.length
-              : AR_SITES.filter(s => s.category === key).length;
+            const count =
+              key === "all"
+                ? combinedSites.length
+                : key === "nearby"
+                ? combinedSites.filter(s => s.distance !== undefined).length
+                : combinedSites.filter(s => s.category === key).length;
             return (
               <button
                 key={key}
@@ -1733,7 +1979,7 @@ export default function ARView({ onClose, initialSite }) {
                 onClick={() => { setActiveCategory(key); setSearchQ(""); }}
               >
                 {cat.icon} {cat.label}
-                <span className="ar-cat-count">{count}</span>
+                <span className="ar-cat-count">{loadingNearby && key === "nearby" ? "…" : count}</span>
               </button>
             );
           })}
@@ -1742,6 +1988,13 @@ export default function ARView({ onClose, initialSite }) {
         <div className="ar-body">
 
           <div className="ar-left">
+            {activeCategory === "nearby" && loadingNearby && (
+              <div className="ar-left-status">📡 Detecting your location…</div>
+            )}
+            {activeCategory === "nearby" && !loadingNearby && nearbyError && (
+              <div className="ar-left-status error">⚠️ {nearbyError}</div>
+            )}
+
             {filtered.length === 0 ? (
               <div className="ar-left-empty">No models found</div>
             ) : filtered.map(site => (
@@ -1754,8 +2007,14 @@ export default function ARView({ onClose, initialSite }) {
                 <div className="ar-item-info">
                   <div className="ar-item-name">{site.name}</div>
                   <div className="ar-item-loc">📍 {site.location}</div>
+                  {!site.sketchfabId && (
+                    <div className="ar-item-nomodel">📷 Camera AR only</div>
+                  )}
                 </div>
                 {site.unesco && <span className="ar-item-unesco">UNESCO</span>}
+                {site.distance !== undefined && (
+                  <span className="ar-item-dist">{site.distance} km</span>
+                )}
               </button>
             ))}
           </div>
@@ -1765,18 +2024,29 @@ export default function ARView({ onClose, initialSite }) {
             <div className="ar-viewer-header">
               <div>
                 <div className="ar-viewer-name">{activeSite.name}</div>
-                <div className="ar-viewer-loc">📍 {activeSite.location} · {activeSite.era}</div>
+                <div className="ar-viewer-loc">
+                  📍 {activeSite.location}{activeSite.era ? ` · ${activeSite.era}` : ""}
+                  {activeSite.distance !== undefined ? ` · ${activeSite.distance} km away` : ""}
+                </div>
               </div>
               <div className="ar-viewer-badges">
                 <span className="ar-viewer-badge gold">{activeSite.subtitle}</span>
                 {activeSite.unesco && <span className="ar-viewer-badge unesco">UNESCO ★</span>}
+                {activeSite.distance !== undefined && (
+                  <span className="ar-viewer-badge green">📍 Near You</span>
+                )}
               </div>
             </div>
 
             <div className="ar-view-tabs">
               <button
                 className={`ar-view-tab ${activeTab === "3d" ? "active" : ""}`}
-                onClick={() => setActiveTab("3d")}
+                onClick={() => activeSite.sketchfabId && setActiveTab("3d")}
+                disabled={!activeSite.sketchfabId}
+                style={{
+                  opacity: activeSite.sketchfabId ? 1 : 0.35,
+                  cursor: activeSite.sketchfabId ? "pointer" : "not-allowed",
+                }}
               >
                 ⬡ 3D Model
               </button>
@@ -1788,7 +2058,7 @@ export default function ARView({ onClose, initialSite }) {
               </button>
             </div>
 
-            {activeTab === "3d" && (
+            {activeTab === "3d" && activeSite.sketchfabId && (
               <div className="ar-frame-wrap">
                 <div className={`ar-frame-loading ${frameLoaded ? "hidden" : ""}`}>
                   <div className="ar-frame-radar">
@@ -1806,6 +2076,16 @@ export default function ARView({ onClose, initialSite }) {
                   allow="autoplay; fullscreen; xr-spatial-tracking; accelerometer; gyroscope; magnetometer"
                   onLoad={() => setFrameLoaded(true)}
                 />
+              </div>
+            )}
+
+            {activeTab === "3d" && !activeSite.sketchfabId && (
+              <div className="ar-no-model">
+                <div className="ar-no-model-icon">⬡</div>
+                <div className="ar-no-model-text">
+                  No 3D model available for this site yet. Switch to <strong>Live Camera AR</strong> to
+                  place its image in your real environment instead.
+                </div>
               </div>
             )}
 
@@ -1910,7 +2190,7 @@ export default function ARView({ onClose, initialSite }) {
               <div className="ar-meta-grid">
                 <div className="ar-meta">
                   <div className="ar-meta-label">Era</div>
-                  <div className="ar-meta-val">{activeSite.era}</div>
+                  <div className="ar-meta-val">{activeSite.era || "—"}</div>
                 </div>
                 <div className="ar-meta">
                   <div className="ar-meta-label">Category</div>
@@ -1922,6 +2202,12 @@ export default function ARView({ onClose, initialSite }) {
                   <div className="ar-meta-label">Location</div>
                   <div className="ar-meta-val">📍 {activeSite.location}</div>
                 </div>
+                {activeSite.distance !== undefined && (
+                  <div className="ar-meta" style={{gridColumn:"1/-1"}}>
+                    <div className="ar-meta-label">Distance From You</div>
+                    <div className="ar-meta-val">{activeSite.distance} km</div>
+                  </div>
+                )}
               </div>
             </div>
 

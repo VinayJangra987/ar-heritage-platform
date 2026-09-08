@@ -1,18 +1,43 @@
 import { useState, useEffect, useCallback } from "react";
 
 const ALL_MONUMENTS = [
-  { id: "taj", name: "Taj Mahal", location: "Agra, UP", state: "Uttar Pradesh", type: "architectural", lat: 27.1751, lng: 78.0421, image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&q=80", era: "17th Century CE" },
-  { id: "qutub", name: "Qutub Minar", location: "New Delhi", state: "Delhi", type: "architectural", lat: 28.5245, lng: 77.1855, image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80", era: "12th Century CE" },
-  { id: "hampi", name: "Hampi Ruins", location: "Hampi, Karnataka", state: "Karnataka", type: "archaeological", lat: 15.335, lng: 76.460, image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=400&q=80", era: "14th–16th Century CE" },
-  { id: "ajanta", name: "Ajanta Caves", location: "Aurangabad, Maharashtra", state: "Maharashtra", type: "religious", lat: 20.5519, lng: 75.7033, image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&q=80", era: "2nd Century BCE" },
-  { id: "amber", name: "Amber Fort", location: "Jaipur, Rajasthan", state: "Rajasthan", type: "architectural", lat: 26.9855, lng: 75.8513, image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=80", era: "16th Century CE" },
-  { id: "ellora", name: "Ellora Caves", location: "Aurangabad, Maharashtra", state: "Maharashtra", type: "religious", lat: 20.0258, lng: 75.1780, image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&q=80", era: "600–1000 CE" },
-  { id: "konark", name: "Konark Sun Temple", location: "Konark, Odisha", state: "Odisha", type: "religious", lat: 19.8876, lng: 86.0946, image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&q=80", era: "13th Century CE" },
-  { id: "fatehpur", name: "Fatehpur Sikri", location: "Agra, UP", state: "Uttar Pradesh", type: "architectural", lat: 27.0945, lng: 77.6610, image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&q=80", era: "16th Century CE" },
-  { id: "khajuraho", name: "Khajuraho Temples", location: "Khajuraho, MP", state: "Madhya Pradesh", type: "religious", lat: 24.8318, lng: 79.9199, image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=400&q=80", era: "10th–11th Century CE" },
-  { id: "mahabalipuram", name: "Mahabalipuram", location: "Tamil Nadu", state: "Tamil Nadu", type: "archaeological", lat: 12.6269, lng: 80.1927, image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=400&q=80", era: "7th–8th Century CE" },
-  { id: "redfort", name: "Red Fort", location: "New Delhi", state: "Delhi", type: "architectural", lat: 28.6562, lng: 77.2410, image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80", era: "17th Century CE" },
-  { id: "humayun", name: "Humayun's Tomb", location: "New Delhi", state: "Delhi", type: "architectural", lat: 28.5933, lng: 77.2507, image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80", era: "16th Century CE" },
+   { id: "taj", name: "Taj Mahal", location: "Agra, UP", state: "Uttar Pradesh", type: "architectural", lat: 27.1751, lng: 78.0421, image: "https://source.unsplash.com/400x300/?taj-mahal", era: "17th Century CE" },
+  { id: "qutub", name: "Qutub Minar", location: "New Delhi", state: "Delhi", type: "architectural", lat: 28.5245, lng: 77.1855, image: "https://source.unsplash.com/400x300/?qutub-minar", era: "12th Century CE" },
+  { id: "hampi", name: "Hampi Ruins", location: "Hampi, Karnataka", state: "Karnataka", type: "archaeological", lat: 15.335, lng: 76.460, image: "https://source.unsplash.com/400x300/?hampi,ruins", era: "14th–16th Century CE" },
+  { id: "ajanta", name: "Ajanta Caves", location: "Aurangabad, Maharashtra", state: "Maharashtra", type: "religious", lat: 20.5519, lng: 75.7033, image: "https://source.unsplash.com/400x300/?ajanta-caves", era: "2nd Century BCE" },
+  { id: "amber", name: "Amber Fort", location: "Jaipur, Rajasthan", state: "Rajasthan", type: "architectural", lat: 26.9855, lng: 75.8513, image: "https://source.unsplash.com/400x300/?amber-fort,jaipur", era: "16th Century CE" },
+  { id: "ellora", name: "Ellora Caves", location: "Aurangabad, Maharashtra", state: "Maharashtra", type: "religious", lat: 20.0258, lng: 75.1780, image: "https://source.unsplash.com/400x300/?ellora-caves", era: "600–1000 CE" },
+  { id: "konark", name: "Konark Sun Temple", location: "Konark, Odisha", state: "Odisha", type: "religious", lat: 19.8876, lng: 86.0946, image: "https://source.unsplash.com/400x300/?konark,sun-temple", era: "13th Century CE" },
+  { id: "fatehpur", name: "Fatehpur Sikri", location: "Agra, UP", state: "Uttar Pradesh", type: "architectural", lat: 27.0945, lng: 77.6610, image: "https://source.unsplash.com/400x300/?fatehpur-sikri", era: "16th Century CE" },
+  { id: "khajuraho", name: "Khajuraho Temples", location: "Khajuraho, MP", state: "Madhya Pradesh", type: "religious", lat: 24.8318, lng: 79.9199, image: "https://source.unsplash.com/400x300/?khajuraho,temple", era: "10th–11th Century CE" },
+  { id: "mahabalipuram", name: "Mahabalipuram", location: "Tamil Nadu", state: "Tamil Nadu", type: "archaeological", lat: 12.6269, lng: 80.1927, image: "https://source.unsplash.com/400x300/?mahabalipuram", era: "7th–8th Century CE" },
+  { id: "redfort", name: "Red Fort", location: "New Delhi", state: "Delhi", type: "architectural", lat: 28.6562, lng: 77.2410, image: "https://source.unsplash.com/400x300/?red-fort,delhi", era: "17th Century CE" },
+  { id: "humayun", name: "Humayun's Tomb", location: "New Delhi", state: "Delhi", type: "architectural", lat: 28.5933, lng: 77.2507, image: "https://source.unsplash.com/400x300/?humayuns-tomb", era: "16th Century CE" },
+  { id: "goldentemple", name: "Golden Temple", location: "Amritsar, Punjab", state: "Punjab", type: "religious", lat: 31.6200, lng: 74.8765, image: "https://source.unsplash.com/400x300/?golden-temple,amritsar", era: "16th Century CE" },
+  { id: "gatewayofindia", name: "Gateway of India", location: "Mumbai, Maharashtra", state: "Maharashtra", type: "architectural", lat: 18.9220, lng: 72.8347, image: "https://source.unsplash.com/400x300/?gateway-of-india", era: "20th Century CE" },
+  { id: "mysorepalace", name: "Mysore Palace", location: "Mysuru, Karnataka", state: "Karnataka", type: "architectural", lat: 12.3052, lng: 76.6552, image: "https://source.unsplash.com/400x300/?mysore-palace", era: "20th Century CE" },
+  { id: "charminar", name: "Charminar", location: "Hyderabad, Telangana", state: "Telangana", type: "architectural", lat: 17.3616, lng: 78.4747, image: "https://source.unsplash.com/400x300/?charminar", era: "16th Century CE" },
+  { id: "victoriamemorial", name: "Victoria Memorial", location: "Kolkata, West Bengal", state: "West Bengal", type: "architectural", lat: 22.5448, lng: 88.3426, image: "https://source.unsplash.com/400x300/?victoria-memorial,kolkata", era: "20th Century CE" },
+  { id: "jaisalmerfort", name: "Jaisalmer Fort", location: "Jaisalmer, Rajasthan", state: "Rajasthan", type: "architectural", lat: 26.9124, lng: 70.9129, image: "https://source.unsplash.com/400x300/?jaisalmer-fort", era: "12th Century CE" },
+  { id: "mehrangarh", name: "Mehrangarh Fort", location: "Jodhpur, Rajasthan", state: "Rajasthan", type: "architectural", lat: 26.2979, lng: 73.0180, image: "https://source.unsplash.com/400x300/?mehrangarh-fort", era: "15th Century CE" },
+  { id: "citypalace", name: "City Palace", location: "Udaipur, Rajasthan", state: "Rajasthan", type: "architectural", lat: 24.5764, lng: 73.6833, image: "https://source.unsplash.com/400x300/?udaipur,city-palace", era: "16th Century CE" },
+  { id: "modheratemple", name: "Sun Temple, Modhera", location: "Modhera, Gujarat", state: "Gujarat", type: "religious", lat: 23.5809, lng: 72.1327, image: "https://source.unsplash.com/400x300/?modhera,sun-temple", era: "11th Century CE" },
+  { id: "ranikivav", name: "Rani ki Vav", location: "Patan, Gujarat", state: "Gujarat", type: "archaeological", lat: 23.8595, lng: 72.1010, image: "https://source.unsplash.com/400x300/?rani-ki-vav,stepwell", era: "11th Century CE" },
+  { id: "elephanta", name: "Elephanta Caves", location: "Mumbai, Maharashtra", state: "Maharashtra", type: "religious", lat: 18.9633, lng: 72.9315, image: "https://source.unsplash.com/400x300/?elephanta-caves", era: "5th–8th Century CE" },
+  { id: "brihadeeswarar", name: "Brihadeeswarar Temple", location: "Thanjavur, Tamil Nadu", state: "Tamil Nadu", type: "religious", lat: 10.7828, lng: 79.1318, image: "https://source.unsplash.com/400x300/?brihadeeswarar,temple", era: "11th Century CE" },
+  { id: "chittorgarh", name: "Chittorgarh Fort", location: "Chittorgarh, Rajasthan", state: "Rajasthan", type: "architectural", lat: 24.8887, lng: 74.6455, image: "https://source.unsplash.com/400x300/?chittorgarh-fort", era: "7th Century CE" },
+  { id: "golconda", name: "Golconda Fort", location: "Hyderabad, Telangana", state: "Telangana", type: "architectural", lat: 17.3833, lng: 78.4011, image: "https://source.unsplash.com/400x300/?golconda-fort", era: "13th Century CE" },
+  { id: "lotustemple", name: "Lotus Temple", location: "New Delhi", state: "Delhi", type: "religious", lat: 28.5535, lng: 77.2588, image: "https://source.unsplash.com/400x300/?lotus-temple,delhi", era: "20th Century CE" },
+  { id: "indiagate", name: "India Gate", location: "New Delhi", state: "Delhi", type: "architectural", lat: 28.6129, lng: 77.2295, image: "https://source.unsplash.com/400x300/?india-gate", era: "20th Century CE" },
+  { id: "jamamasjid", name: "Jama Masjid", location: "New Delhi", state: "Delhi", type: "religious", lat: 28.6507, lng: 77.2334, image: "https://source.unsplash.com/400x300/?jama-masjid,delhi", era: "17th Century CE" },
+  { id: "ranakpur", name: "Ranakpur Jain Temple", location: "Ranakpur, Rajasthan", state: "Rajasthan", type: "religious", lat: 25.1160, lng: 73.4884, image: "https://source.unsplash.com/400x300/?ranakpur,jain-temple", era: "15th Century CE" },
+  { id: "somnath", name: "Somnath Temple", location: "Somnath, Gujarat", state: "Gujarat", type: "religious", lat: 20.8880, lng: 70.4013, image: "https://source.unsplash.com/400x300/?somnath-temple", era: "Ancient (rebuilt 1951)" },
+  { id: "dwarkadhish", name: "Dwarkadhish Temple", location: "Dwarka, Gujarat", state: "Gujarat", type: "religious", lat: 22.2394, lng: 68.9678, image: "https://source.unsplash.com/400x300/?dwarka,temple", era: "Ancient (rebuilt 16th CE)" },
+  { id: "nalanda", name: "Nalanda Ruins", location: "Nalanda, Bihar", state: "Bihar", type: "archaeological", lat: 25.1360, lng: 85.4437, image: "https://source.unsplash.com/400x300/?nalanda,ruins", era: "5th Century CE" },
+  { id: "mahabodhi", name: "Mahabodhi Temple", location: "Bodh Gaya, Bihar", state: "Bihar", type: "religious", lat: 24.6959, lng: 84.9917, image: "https://source.unsplash.com/400x300/?mahabodhi-temple,bodhgaya", era: "3rd Century BCE" },
+  { id: "jantarmantar", name: "Jantar Mantar", location: "Jaipur, Rajasthan", state: "Rajasthan", type: "architectural", lat: 26.9247, lng: 75.8244, image: "https://source.unsplash.com/400x300/?jantar-mantar,jaipur", era: "18th Century CE" },
+  { id: "hawamahal", name: "Hawa Mahal", location: "Jaipur, Rajasthan", state: "Rajasthan", type: "architectural", lat: 26.9239, lng: 75.8267, image: "https://source.unsplash.com/400x300/?hawa-mahal", era: "18th Century CE" },
+  { id: "vaishnodevi", name: "Vaishno Devi Temple", location: "Katra, Jammu & Kashmir", state: "Jammu & Kashmir", type: "religious", lat: 33.0306, lng: 74.9496, image: "https://source.unsplash.com/400x300/?vaishno-devi,temple", era: "Ancient" },
 ];
 
 const typeColors = {
@@ -28,6 +53,28 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+
+function normalizeSite(site) {
+  const [lng, lat] = site.location?.coordinates || [];
+
+  const locationLabel = [site.district, site.state]
+    .filter(Boolean)
+    .join(", ");
+
+  return {
+    id: site._id,
+    name: site.name,
+    image: site.thumbnail,
+    location: locationLabel || site.state || "India",
+    state: site.state,
+    type: site.type,
+    lat,
+    lng,
+    distance: site.distance,
+    hasTour: site.hasTour,
+  };
+}
+
 export default function NearbySites({ onClose, onViewSite }) {
   const [status,   setStatus]   = useState("idle"); // idle | loading | success | error | denied
   const [userPos,  setUserPos]  = useState(null);
@@ -35,24 +82,38 @@ export default function NearbySites({ onClose, onViewSite }) {
   const [radius,   setRadius]   = useState(500); // km
   const [sortBy,   setSortBy]   = useState("distance");
 
-  const fetchLocation = useCallback(() => {
-    setStatus("loading");
-    if (!navigator.geolocation) { setStatus("error"); return; }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        setUserPos({ lat, lng });
-        const withDist = ALL_MONUMENTS.map(m => ({
-          ...m,
-          distance: Math.round(haversineKm(lat, lng, m.lat, m.lng)),
-        })).filter(m => m.distance <= radius).sort((a, b) => a.distance - b.distance);
-        setResults(withDist);
+const fetchLocation = useCallback(() => {
+  setStatus("loading");
+  if (!navigator.geolocation) { setStatus("error"); return; }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      setUserPos({ lat, lng });
+
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+        const res = await fetch(
+          `${API_BASE}/nearby?lat=${lat}&lng=${lng}&radius=${radius}&limit=50`
+        );
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const normalized = (data.sites || []).map(normalizeSite);
+        setResults(normalized);
         setStatus("success");
-      },
-      () => setStatus("denied"),
-      { timeout: 10000 }
-    );
-  }, [radius]);
+      } 
+       
+      catch (err) {
+        console.error("Nearby fetch failed:", err);
+        setStatus("error");
+      }
+    },
+    () => setStatus("denied"),
+    { timeout: 10000 , enableHighAccuracy: true }
+  );
+}, [radius]); 
+
 
   useEffect(() => { fetchLocation(); }, [fetchLocation]);
 
@@ -251,7 +312,6 @@ export default function NearbySites({ onClose, onViewSite }) {
                         </span>
                         <div className="nb-card-name">{m.name}</div>
                         <div className="nb-card-loc">📍 {m.location}</div>
-                        <div className="nb-card-era">{m.era}</div>
                         <div className="nb-card-footer">
                           <div className="nb-card-era">{m.state}</div>
                           <button className="nb-map-btn" onClick={e => { e.stopPropagation(); window.open(`https://maps.google.com?q=${m.lat},${m.lng}`, "_blank"); }}>

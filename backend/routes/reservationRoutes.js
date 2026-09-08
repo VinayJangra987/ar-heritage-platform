@@ -11,7 +11,7 @@ import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/export", protect, adminOnly, exportReservations);  
+router.get("/export/excel", protect, adminOnly, exportReservations);  
 
 router.post("/", protect, createReservation);
 
