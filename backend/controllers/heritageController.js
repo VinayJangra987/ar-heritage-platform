@@ -1,5 +1,5 @@
 import Heritage from "../models/Heritage.js";
-
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // ============ GET ALL SITES ============
 export const getAllSites = async (req, res) => {
   try {
@@ -12,13 +12,14 @@ export const getAllSites = async (req, res) => {
     if (unesco) filter.unesco = unesco === "true";
 
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { state: { $regex: search, $options: "i" } },
-        { district: { $regex: search, $options: "i" } },
-        { tags: { $in: [new RegExp(search, "i")] } },
-      ];
-    }
+  const safeSearch = escapeRegex(search);
+  filter.$or = [
+    { name: { $regex: safeSearch, $options: "i" } },
+    { state: { $regex: safeSearch, $options: "i" } },
+    { district: { $regex: safeSearch, $options: "i" } },
+    { tags: { $in: [new RegExp(safeSearch, "i")] } },
+  ];
+}
 
     const skip = (Number(page) - 1) * Number(limit);
 

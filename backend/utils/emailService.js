@@ -478,3 +478,138 @@ If you did not request this, you can safely ignore this email.`,
     throw error;
   }
 };
+// ── Send Booking Confirmation Email ──
+export const sendBookingConfirmationEmail = async (
+  email,
+  name,
+  reservationDetails
+) => {
+  try {
+    if (!process.env.MAILJET_API_KEY) {
+      throw new Error("MAILJET_API_KEY is missing");
+    }
+    if (!process.env.MAILJET_SECRET_KEY) {
+      throw new Error("MAILJET_SECRET_KEY is missing");
+    }
+    if (!process.env.MAILJET_SENDER_EMAIL) {
+      throw new Error("MAILJET_SENDER_EMAIL is missing");
+    }
+
+    const {
+      reservationCode,
+      siteName,
+      visitDate,
+      timeSlot,
+      seats,
+    } = reservationDetails;
+
+    const formattedDate = new Date(visitDate).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    console.log("📧 Sending Reservation Confirmation via Mailjet API...");
+    console.log("📨 Recipient:", email);
+    console.log("🎫 Reservation Code:", reservationCode);
+
+    const subject = `Reservation Confirmed - ${siteName} | Bharatiya Dharohar`;
+
+    const request = await mailjet
+      .post("send", { version: "v3.1" })
+      .request({
+        Messages: [
+          {
+            From: {
+              Email: process.env.MAILJET_SENDER_EMAIL,
+              Name: process.env.MAILJET_SENDER_NAME || "Bharatiya Dharohar",
+            },
+            To: [
+              {
+                Email: email,
+                Name: name || "Visitor",
+              },
+            ],
+            Subject: subject,
+
+            TextPart: `Your heritage visit is confirmed!
+
+            Reservation Code: ${reservationCode}
+            Site: ${siteName}
+            Date: ${formattedDate}
+            Time Slot: ${timeSlot}
+            Seats: ${seats}
+
+            Please show this Reservation Code at the entry gate.
+
+            Thank you for booking with Bharatiya Dharohar!`,
+
+            HTMLPart: `
+              <div style="
+                font-family: Arial, sans-serif;
+                max-width: 480px;
+                margin: auto;
+                padding: 30px;
+                background: #0D1B2A;
+                color: #F2E8D0;
+                border-radius: 12px;
+              ">
+                <h2 style="color: #C9A84C;">🏛 Bharatiya Dharohar</h2>
+
+                <p>Hello <strong>${name || "Visitor"}</strong>,</p>
+
+                <p>Your heritage visit reservation is confirmed 🎉</p>
+
+                <div style="
+                  background: rgba(201, 168, 76, 0.1);
+                  border-radius: 8px;
+                  padding: 20px;
+                  margin: 20px 0;
+                ">
+                  <p style="margin: 6px 0;"><strong>Reservation Code:</strong> ${reservationCode}</p>
+                  <p style="margin: 6px 0;"><strong>Site:</strong> ${siteName}</p>
+                  <p style="margin: 6px 0;"><strong>Date:</strong> ${formattedDate}</p>
+                  <p style="margin: 6px 0;"><strong>Time Slot:</strong> ${timeSlot}</p>
+                  <p style="margin: 6px 0;"><strong>Seats:</strong> ${seats}</p>
+                </div>
+
+                <p>Please show this Reservation Code at the entry gate.</p>
+
+                <p style="color: #aaa; font-size: 13px;">
+                  Thank you for booking with Bharatiya Dharohar!
+                </p>
+              </div>
+            `,
+          },
+        ],
+      });
+
+    console.log("📬 MAILJET RESPONSE:", JSON.stringify(request.body, null, 2));
+
+    const message = request.body?.Messages?.[0];
+
+    if (!message) {
+      throw new Error("Invalid response received from Mailjet");
+    }
+    if (message.Status !== "success") {
+      throw new Error(
+        message.Errors?.[0]?.ErrorMessage || "Mailjet failed to send email"
+      );
+    }
+
+    console.log("✅ RESERVATION CONFIRMATION EMAIL SENT SUCCESSFULLY");
+
+    return request.body;
+
+  } catch (error) {
+    console.error("❌ MAILJET EMAIL ERROR:");
+    console.error(
+      error.response?.data ||
+      error.response?.body ||
+      error.body ||
+      error.message ||
+      error
+    );
+    throw error;
+  }
+};
