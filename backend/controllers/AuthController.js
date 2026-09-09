@@ -630,7 +630,8 @@ export const refreshToken = async (
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_REFRESH_SECRET
+      process.env.JWT_REFRESH_SECRET,
+      { algorithms: ["HS256"] }
     );
 
     const user =
@@ -1127,7 +1128,8 @@ export const resetPassword = async (
       decoded =
         jwt.verify(
           resetToken,
-          process.env.JWT_SECRET
+          process.env.JWT_SECRET,
+          { algorithms: ["HS256"] }
         );
 
     } catch (error) {

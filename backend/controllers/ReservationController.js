@@ -166,7 +166,6 @@ const generateReservationCode = () => {
     .toString(36)
     .substring(2, 7)
     .toUpperCase();
-
   return `BD-${Date.now()
     .toString()
     .slice(-6)}-${random}`;
