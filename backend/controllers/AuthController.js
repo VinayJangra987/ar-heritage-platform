@@ -8,20 +8,20 @@ import { updateStreak, awardBadges } from "../utils/gamification.js";
 
 // ── Token generators ──
 const generateAccessToken = (userId) => {
-  console.log("ACCESS ISSUER:", process.env.JWT_ISSUER, "| AUDIENCE:", process.env.JWT_AUDIENCE);
+  console.log("| AUDIENCE:", process.env.JWT_AUDIENCE);
   return jwt.sign(
     { id: userId },
     process.env.JWT_SECRET,
-    { expiresIn: "15m", issuer: process.env.JWT_ISSUER, audience: process.env.JWT_AUDIENCE }
+    { expiresIn: "15m", audience: process.env.JWT_AUDIENCE }
   );
 };
 
 const generateRefreshToken = (userId) =>{
-    console.log("ISSUER:", process.env.JWT_ISSUER, "| AUDIENCE:", process.env.JWT_AUDIENCE);
+    console.log("| AUDIENCE:", process.env.JWT_AUDIENCE);
   return jwt.sign(
     { id: userId },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "7d",issuer:process.env.JWT_ISSUER,audience: process.env.JWT_AUDIENCE}
+    { expiresIn: "7d",audience: process.env.JWT_AUDIENCE}
   );
 }
 
@@ -636,7 +636,6 @@ export const refreshToken = async (
       token,
       process.env.JWT_REFRESH_SECRET,
       { algorithms: ["HS256"] ,
-        issuer: process.env.JWT_ISSUER,
         audience: process.env.JWT_AUDIENCE
        }
     );
@@ -1136,7 +1135,7 @@ export const resetPassword = async (
         jwt.verify(
           resetToken,
           process.env.JWT_SECRET,
-          { algorithms: ["HS256"] ,issuer: process.env.JWT_ISSUER ,audience: process.env.JWT_AUDIENCE}
+          { algorithms: ["HS256"],audience: process.env.JWT_AUDIENCE}
         );
 
     } catch (error) {
