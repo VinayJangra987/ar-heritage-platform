@@ -1,3 +1,4 @@
+require('dotenv').config();
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -14,12 +15,14 @@ const generateAccessToken = (userId) =>
     { expiresIn: "15m" , issuer:process.env.JWT_ISSUER,audience: process.env.JWT_AUDIENCE}
   );
 
-const generateRefreshToken = (userId) =>
-  jwt.sign(
+const generateRefreshToken = (userId) =>{
+    console.log("ISSUER:", process.env.JWT_ISSUER, "| AUDIENCE:", process.env.JWT_AUDIENCE);
+  return jwt.sign(
     { id: userId },
     process.env.JWT_REFRESH_SECRET,
     { expiresIn: "7d",issuer:process.env.JWT_ISSUER,audience: process.env.JWT_AUDIENCE}
   );
+}
 
 const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
