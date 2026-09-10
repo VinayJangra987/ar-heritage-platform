@@ -79,18 +79,18 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
   const handleReviewSubmit = async () => {
 
     if (!user) {
-      setRvError("Pehle login karo!");
+      setRvError("Please log in first!");
       return;
     }
 
     if (!comment) {
-      setRvError("Comment zaroor likho!");
+      setRvError("Please write a comment!");
       return;
     }
 
     // Invalid/local site protection
    if (!siteId) {
-  setRvError("Is site ke reviews abhi available nahi hain.");
+  setRvError("Reviews are not available for this site yet.");
   return;
 }
 
@@ -111,7 +111,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
 
         setReviews((prev) => [data.review, ...prev]);
 
-        setRvSuccess("Review submit ho gaya! ✅");
+        setRvSuccess("Review submitted successfully! ✅");
 
         setComment("");
         setTitle("");
@@ -121,7 +121,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
 
       } else {
 
-        setRvError(data.message || "Kuch error aaya!");
+        setRvError(data.message || "Something went wrong!");
 
       }
 
@@ -129,7 +129,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
 
       setRvError(
         err?.response?.data?.message ||
-        "Review submit nahi ho paya!"
+        "Failed to submit review."
       );
 
     } finally {
@@ -142,7 +142,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
   // ❤️ Like / unlike a review
   const handleLike = async (reviewId) => {
     if (!user) {
-      setRvError("Like karne ke liye login karo!");
+      setRvError('Please log in to like this!');
       return;
     }
     setLikingId(reviewId);
@@ -168,13 +168,13 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
 
   // 🗑️ Delete own review
   const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm("Ye review delete karna hai?")) return;
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
     setDeletingId(reviewId);
     try {
       await reviewsAPI.deleteReview(reviewId);
       setReviews((prev) => prev.filter((r) => r._id !== reviewId));
     } catch (err) {
-      setRvError("Review delete nahi ho paya!");
+      setRvError("Unable to delete the review!");
     }
     setDeletingId(null);
   };
@@ -221,7 +221,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
       if (onShowAuth) {
         onShowAuth();
       } else {
-        alert("Reserve karne ke liye pehle login karo!");
+        alert("Please log in first to reserve a seat!");
       }
       return;
     }
@@ -612,7 +612,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
                     />
                     <textarea
                       className="rv-textarea"
-                      placeholder="Share Your Experience"
+                      placeholder="Share your experience"
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                     />
@@ -653,7 +653,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
                   </div>
                 ) : (
                   <div className="rv-login-msg">
-                    Firstly Login to Write an review🔐
+                    Please log in first to write a review 🔐
                   </div>
                 )}
 
@@ -665,7 +665,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
                 {rvLoading ? (
                   <div className="rv-empty">Loading reviews...</div>
                 ) : reviews.length === 0 ? (
-                  <div className="rv-empty">Write a Review! ✍️</div>
+                  <div className="rv-empty">Write a review! ✍️</div>
                 ) : (
                   reviews.map((r) => {
                     const isLiked = user && r.likes?.includes(user._id);
