@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AdminProvider } from "./context/AdminContext";
 
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -894,7 +895,7 @@ function AppInner() {
 
   const handleSearch = async (q) => {
 
-    setSearchQuery(q);
+    // setSearchQuery(q);
 
 
     if (q.trim().length < 2) {
@@ -1735,7 +1736,6 @@ if (user.role !== "admin") {
 
 
                 <input
-
                   autoFocus
 
                   className="search-input"
@@ -1743,13 +1743,7 @@ if (user.role !== "admin") {
                   placeholder="Search by site name, state, type..."
 
                   value={searchQuery}
-
-                  onChange={(e) =>
-                   throttledSearch(
-                      e.target.value
-                    )
-                  }
-
+                  onChange={(e) => handleSearchInput(e.target.value)}
                 />
 
 
@@ -2292,12 +2286,13 @@ if (user.role !== "admin") {
 export default function App() {
 
   return (
-
+    <AdminProvider>
     <AuthProvider>
 
       <AppInner />
 
     </AuthProvider>
+    </AdminProvider>
 
   );
 

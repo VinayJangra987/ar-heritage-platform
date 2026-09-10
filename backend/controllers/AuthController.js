@@ -11,14 +11,14 @@ const generateAccessToken = (userId) =>
   jwt.sign(
     { id: userId },
     process.env.JWT_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" , issuer:process.env.JWT_ISSUER,audience: process.env.JWT_AUDIENCE}
   );
 
 const generateRefreshToken = (userId) =>
   jwt.sign(
     { id: userId },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "7d",issuer:process.env.JWT_ISSUER,audience: process.env.JWT_AUDIENCE}
   );
 
 const generateOTP = () =>
@@ -631,7 +631,10 @@ export const refreshToken = async (
     const decoded = jwt.verify(
       token,
       process.env.JWT_REFRESH_SECRET,
-      { algorithms: ["HS256"] }
+      { algorithms: ["HS256"] ,
+        issuer: process.env.JWT_ISSUER,
+        audience: process.env.JWT_AUDIENCE
+       }
     );
 
     const user =
@@ -1129,7 +1132,7 @@ export const resetPassword = async (
         jwt.verify(
           resetToken,
           process.env.JWT_SECRET,
-          { algorithms: ["HS256"] }
+          { algorithms: ["HS256"] ,issuer: process.env.JWT_ISSUER ,audience: process.env.JWT_AUDIENCE}
         );
 
     } catch (error) {

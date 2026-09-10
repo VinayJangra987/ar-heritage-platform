@@ -312,7 +312,6 @@ const Navbar = ({
       {isAdmin && showAdmin && (
         <AdminPanel
           onClose={() => setShowAdmin(false)}
-          adminUser={user}
         />
       )}
     </>

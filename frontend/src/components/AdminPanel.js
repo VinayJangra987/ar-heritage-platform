@@ -1,5 +1,6 @@
 // import { useState, useEffect } from "react";
 // import { useDebounce } from "../Hooks/useDebounce";
+// import { useAdmin } from "../context/AdminContext"; 
 
 // // ── Default monuments ──
 // const DEFAULT_MONUMENTS = [
@@ -80,6 +81,7 @@
 //   const [filterStatus,  setFilterStatus]  = useState("all");
 //   const [apiLoading,    setApiLoading]    = useState(false);
 //   const [apiError,      setApiError]      = useState("");
+//   const [exportLoading, setExportLoading] = useState(false);
 
 
 //   useEffect(() => {
@@ -165,6 +167,39 @@
 //     }
 //   };
 
+//   // ── NEW: Export all reservations to Excel ──
+//   const handleExportReservations = async () => {
+//     setExportLoading(true);
+//     setApiError("");
+//     try {
+//       const token = localStorage.getItem("token");
+//       const res = await fetch(`${API_BASE}/reservations/export`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+
+//       if (!res.ok) {
+//         const errData = await res.json().catch(() => ({}));
+//         throw new Error(errData.message || "Export failed");
+//       }
+
+//       const blob = await res.blob();
+//       const url = window.URL.createObjectURL(blob);
+
+//       const a = document.createElement("a");
+//       a.href = url;
+//       a.download = `reservations-${Date.now()}.xlsx`;
+//       document.body.appendChild(a);
+//       a.click();
+//       a.remove();
+
+//       window.URL.revokeObjectURL(url);
+//     } catch (err) {
+//       setApiError(`Export failed: ${err.message}`);
+//     } finally {
+//       setExportLoading(false);
+//     }
+//   };
+
 //   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
 //   const validateForm = () => {
@@ -210,9 +245,7 @@
 //       coordinates: [Number(form.lng), Number(form.lat)],
 //     };
 //   }
-
 //     if (editTarget) {
-
 //       const backendId = editTarget._id || editTarget.id;
 //       const result = await updateToBackend(backendId, monumentData);
 //       if (!result.success) {
@@ -260,13 +293,6 @@
 //     setView("dashboard");
 //     setApiLoading(false);
 //   };
-
-//   // const openEdit = (m) => {
-//   //   setEditTarget(m);
-//   //   setForm({ ...emptyForm, ...m, facts: (m.facts || []).join("\n") });
-//   //   setFormErrors({});
-//   //   setView("edit");
-//   // };
 
 //  const openEdit = async (m) => {
 //   setEditTarget(m);
@@ -335,6 +361,9 @@
 //         .adm-topbar-btn.gold:disabled{opacity:0.6;cursor:not-allowed;}
 //         .adm-topbar-btn.ghost{background:rgba(242,232,208,0.06);color:rgba(242,232,208,0.5);border:1px solid rgba(242,232,208,0.1);}
 //         .adm-topbar-btn.ghost:hover{background:rgba(242,232,208,0.1);color:#F2E8D0;}
+//         .adm-topbar-btn.outline{background:transparent;color:#C9A84C;border:1px solid rgba(201,168,76,0.35);}
+//         .adm-topbar-btn.outline:hover{background:rgba(201,168,76,0.08);}
+//         .adm-topbar-btn.outline:disabled{opacity:0.6;cursor:not-allowed;}
 //         .adm-body{display:flex;flex:1;overflow:hidden;}
 //         .adm-sidebar{width:200px;flex-shrink:0;background:rgba(5,12,22,0.8);border-right:1px solid rgba(201,168,76,0.08);padding:1rem 0.75rem;display:flex;flex-direction:column;gap:0.3rem;}
 //         .adm-nav-label{font-family:'Space Mono',monospace;font-size:0.46rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.4);padding:0.5rem 0.6rem 0.3rem;}
@@ -426,6 +455,14 @@
 //               <div className="adm-user-dot" />
 //               {adminUser?.email || adminUser?.name || "Admin"}
 //             </div>
+//             {/* ── NEW: Export reservations button ── */}
+//             <button
+//               className="adm-topbar-btn outline"
+//               disabled={exportLoading}
+//               onClick={handleExportReservations}
+//             >
+//               {exportLoading ? "⏳ Exporting..." : "📊 Export Reservations"}
+//             </button>
 //             <button
 //               className="adm-topbar-btn gold"
 //               disabled={apiLoading}
@@ -690,8 +727,18 @@
 
 
 
+
+
+
+
+
+
+
+
 import { useState, useEffect } from "react";
 import { useDebounce } from "../Hooks/useDebounce";
+import { useAdmin } from "../context/AdminContext"; 
+
 
 // ── Default monuments ──
 const DEFAULT_MONUMENTS = [
@@ -757,9 +804,9 @@ const emptyForm = {
 };
 
 // ════════════════════════════════════════════════════════════════════════════
-export default function AdminPanel({ onClose, onMonumentsUpdate, adminUser }) {
+export default function AdminPanel({ onClose}) {
 
-  const [monuments,     setMonuments]     = useState(getMonuments);
+  // const [monuments,     setMonuments]     = useState(getMonuments);
   const [view,          setView]          = useState("dashboard");
   const [editTarget,    setEditTarget]    = useState(null);
   const [form,          setForm]          = useState(emptyForm);
@@ -772,7 +819,9 @@ export default function AdminPanel({ onClose, onMonumentsUpdate, adminUser }) {
   const [filterStatus,  setFilterStatus]  = useState("all");
   const [apiLoading,    setApiLoading]    = useState(false);
   const [apiError,      setApiError]      = useState("");
-  const [exportLoading, setExportLoading] = useState(false); // ← NEW
+  const [exportLoading, setExportLoading] = useState(false);
+  const { adminUser:adminUserContext, monuments, setMonuments } = useAdmin();
+  const adminUser = adminUserContext;
 
 
   useEffect(() => {
@@ -795,9 +844,9 @@ export default function AdminPanel({ onClose, onMonumentsUpdate, adminUser }) {
   fetchFromBackend();
 }, []);
 
-  useEffect(() => {
-    if (onMonumentsUpdate) onMonumentsUpdate(monuments);
-  }, [monuments, onMonumentsUpdate]);
+  // useEffect(() => {
+  //   if (onMonumentsUpdate) onMonumentsUpdate(monuments);
+  // }, [monuments, onMonumentsUpdate]);
 
 
   const saveToBackend = async (monumentData) => {
@@ -936,9 +985,7 @@ export default function AdminPanel({ onClose, onMonumentsUpdate, adminUser }) {
       coordinates: [Number(form.lng), Number(form.lat)],
     };
   }
-
     if (editTarget) {
-
       const backendId = editTarget._id || editTarget.id;
       const result = await updateToBackend(backendId, monumentData);
       if (!result.success) {

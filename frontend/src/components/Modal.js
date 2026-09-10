@@ -653,7 +653,7 @@ const siteId = /^[a-f\d]{24}$/i.test(site?._id) ? site._id : null;
                   </div>
                 ) : (
                   <div className="rv-login-msg">
-                    Reviews likhne ke liye pehle login karo 🔐
+                    Firstly Login to Write an review🔐
                   </div>
                 )}
 
