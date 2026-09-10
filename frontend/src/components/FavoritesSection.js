@@ -8,11 +8,12 @@ export default function FavoritesSection({ onSiteClick, onShowAuth }) {
   const allSites = heritageData.getAllSites();
 
   // ✅ FIX — id aur _id dono check karo (MongoDB _id vs local id)
-  const favSites = user?.favorites
-    ? allSites.filter(s =>
+   const favSites = user?.favorites
+    ? sites.filter(s =>
         user.favorites.includes(s.id) ||
         user.favorites.includes(s._id) ||
-        user.favorites.includes(String(s.id))
+        user.favorites.includes(String(s.id)) ||
+        user.favorites.includes(String(s._id))
       )
     : [];
 
