@@ -7,12 +7,14 @@ import { sendOTPEmail } from "../utils/emailService.js";
 import { updateStreak, awardBadges } from "../utils/gamification.js";
 
 // ── Token generators ──
-const generateAccessToken = (userId) =>
-  jwt.sign(
+const generateAccessToken = (userId) => {
+  console.log("ACCESS ISSUER:", process.env.JWT_ISSUER, "| AUDIENCE:", process.env.JWT_AUDIENCE);
+  return jwt.sign(
     { id: userId },
     process.env.JWT_SECRET,
-    { expiresIn: "15m" , issuer:process.env.JWT_ISSUER,audience: process.env.JWT_AUDIENCE}
+    { expiresIn: "15m", issuer: process.env.JWT_ISSUER, audience: process.env.JWT_AUDIENCE }
   );
+};
 
 const generateRefreshToken = (userId) =>{
     console.log("ISSUER:", process.env.JWT_ISSUER, "| AUDIENCE:", process.env.JWT_AUDIENCE);
